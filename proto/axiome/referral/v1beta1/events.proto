@@ -1,0 +1,22 @@
+syntax = "proto3";
+package axiome.referral.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "axiome/referral/v1beta1/types.proto";
+
+option go_package = "github.com/axiome-pro/axm-node/x/referral/types";
+
+message EventStatusUpdated {
+  string address = 1;
+  Status before = 2;
+  Status after = 3;
+}
+
+message EventStatusWillBeDowngraded {
+  string address = 1;
+  google.protobuf.Timestamp time = 2
+      [ (gogoproto.stdtime) = true, (gogoproto.nullable) = false ];
+}
+
+message EventStatusDowngradeCanceled { string address = 1; }

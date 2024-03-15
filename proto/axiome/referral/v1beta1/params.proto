@@ -1,0 +1,29 @@
+syntax = "proto3";
+package axiome.referral.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/axiome-pro/axm-node/x/referral/types";
+
+// Params - used for initializing default parameter for x/referral at genesis
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+
+  NetworkAward delegating_award = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.jsontag) = "delegating_award",
+    (gogoproto.moretags) = "yaml:\"delegating_award\""
+  ];
+
+  int32 status_downgrade_period = 2;
+}
+
+message NetworkAward {
+  option (gogoproto.equal) = true;
+
+  repeated string network = 1 [
+    (gogoproto.customtype) = "github.com/axiome-pro/axm-node/util.Fraction",
+    (gogoproto.jsontag) = "network",
+    (gogoproto.moretags) = "yaml:\"network,flow\""
+  ];
+}

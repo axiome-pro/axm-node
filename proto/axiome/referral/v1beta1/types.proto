@@ -1,0 +1,119 @@
+syntax = "proto3";
+package axiome.referral.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/axiome-pro/axm-node/x/referral/types";
+
+enum Status {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  STATUS_UNSPECIFIED = 0;
+  STATUS_NEW = 1;
+  STATUS_STARTER = 2;
+  STATUS_LEADER = 3;
+  STATUS_GURU = 4;
+  STATUS_BOSS = 5;
+  STATUS_PRO = 6;
+  STATUS_TOP = 7;
+  STATUS_MEGA = 8;
+  STATUS_DEPRECATED = 9;
+}
+
+message Info {
+  option (gogoproto.goproto_getters) = false;
+
+  // Status - account status
+  Status status = 1 [
+    (gogoproto.jsontag) = "status",
+    (gogoproto.moretags) = "yaml:\"status\""
+  ];
+
+  // Referrer - parent, account just above this one.
+  string referrer = 2 [
+    (gogoproto.jsontag) = "referrer,omitempty",
+    (gogoproto.moretags) = "yaml:\"referrer,omitempty\""
+  ];
+
+  // Active - does the account keeper have a paid subscription.
+  bool active = 4 [
+    (gogoproto.jsontag) = "active",
+    (gogoproto.moretags) = "yaml:\"active\""
+  ];
+
+  reserved 5;
+  reserved 6;
+
+  // ActiveRefCounts - count of active referrals per level (up to 14 levels
+  // deep). And so on. ActiveReferrals[0] represents an account itself. It must
+  // be equal 1 if account is active, and 0 if it's not.
+  repeated uint64 active_ref_counts = 7 [
+    (gogoproto.jsontag) = "active_ref_counts",
+    (gogoproto.moretags) = "yaml:\"active_ref_counts,flow\""
+  ];
+
+  google.protobuf.Timestamp status_downgrade_at = 8 [
+    (gogoproto.stdtime) = true,
+    (gogoproto.nullable) = true,
+    (gogoproto.jsontag) = "status_downgrade_at,omitempty",
+    (gogoproto.moretags) = "yaml:\"status_downgrade_at,omitempty\""
+  ];
+
+  string self_delegated = 9 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.jsontag) = "delegated",
+    (gogoproto.moretags) = "yaml:\"self_delegated,flow\""
+  ];
+
+  string team_delegated = 10 [
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.jsontag) = "delegated",
+    (gogoproto.moretags) = "yaml:\"team_delegated,flow\""
+  ];
+
+  ActiveAggregations active_count = 11;
+}
+
+message ActiveAggregations {
+  option (gogoproto.goproto_getters) = false;
+
+  int32 first_line = 1;
+  int32 first_line_by3 = 2;
+
+  int32 team0 = 3;
+  int32 team15 = 4;
+  int32 team50 = 5;
+  int32 team100 = 6;
+  int32 team300 = 7;
+}
+
+message StatusCheckResult {
+  option (gogoproto.goproto_getters) = false;
+  option (gogoproto.goproto_unrecognized) = false;
+  option (gogoproto.goproto_unkeyed) = false;
+  option (gogoproto.goproto_sizecache) = false;
+
+  bool overall = 1;
+  repeated Criterion criteria = 2 [ (gogoproto.nullable) = false ];
+
+  message Criterion {
+    bool met = 1;
+    Rule rule = 2;
+    uint64 target_value = 3;
+    uint64 actual_value = 4;
+    uint64 parameter_x = 5;
+
+    enum Rule {
+      option (gogoproto.goproto_enum_prefix) = false;
+
+      RULE_UNSPECIFIED = 0;
+      RULE_N_REFERRALS_WITH_X_REFERRALS_EACH = 1;
+      RULE_N_COINS_IN_STRUCTURE = 2;
+      RULE_N_TEAMS_OF_X_PEOPLE_EACH = 3;
+      RULE_PARTICIPATE_IN_REFERRAL_PROGRAM = 4;
+      RULE_SELF_STAKE = 5;
+    }
+  }
+}

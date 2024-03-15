@@ -1,0 +1,86 @@
+{
+  "params": {
+    "delegating_award": {
+      "network": [
+        "5%",
+        "1%",
+        "2%",
+        "1%",
+        "1%",
+        "1%",
+        "1%",
+        "1%",
+        "7/1000",
+        "5/1000",
+        "3/1000",
+        "2/1000",
+        "2/1000",
+        "1/1000"
+      ]
+    },
+    "status_downgrade_period": 20
+  },
+  "top_level_accounts": [
+    {
+      "address": "axm1v6xdm93m5s9lvu0ux4k76s2p7hgkzj00u8w5z7",
+      "status": "STATUS_GURU"
+    }
+  ],
+  "other_accounts": [
+    {
+      "referrer": "axm1v6xdm93m5s9lvu0ux4k76s2p7hgkzj00u8w5z7",
+      "referrals": [
+        {
+          "address": "axm10clqnnaplc06jv4n8a5kyx9qaatuh2au3hrasg",
+          "status": "STATUS_NEW"
+        },
+        {
+          "address": "axm1rkk2x2jedsdkmckyrxzjx9tdtavnqwlpqf3yts",
+          "status": "STATUS_NEW"
+        }
+      ]
+    },
+    {
+      "referrer": "axm1rkk2x2jedsdkmckyrxzjx9tdtavnqwlpqf3yts",
+      "referrals": [
+        {
+          "address": "axm1042mz3m4c6cxeucjd609e8eajqua8z0crlk3td",
+          "status": "STATUS_NEW"
+        },
+        {
+          "address": "axm157lyytcwlk4lg2h7tvssapf9x45g7re5mlv96r",
+          "status": "STATUS_NEW"
+        },
+        {
+          "address": "axm15ltmumw44fljaj792z6ymzyt54uaqz6c54u8wk",
+          "status": "STATUS_NEW"
+        }
+      ]
+    },
+    {
+      "referrer": "axm157lyytcwlk4lg2h7tvssapf9x45g7re5mlv96r",
+      "referrals": [
+        {
+          "address": "axm1f3gx40xsh34u35xfyymedkt55mlfkxqzrd6gfu",
+          "status": "STATUS_NEW"
+        }
+      ]
+    },
+    {
+      "referrer": "axm1f3gx40xsh34u35xfyymedkt55mlfkxqzrd6gfu",
+      "referrals": [
+        {
+          "address": "axm14nnlxrtqchasxa7u6u0vg7pmqpu8jjxg74x4u3",
+          "status": "STATUS_NEW"
+        }
+      ]
+    }
+  ],
+  "downgrades": [
+    {
+      "account": "axm1v6xdm93m5s9lvu0ux4k76s2p7hgkzj00u8w5z7",
+      "current": "STATUS_GURU",
+      "time": "2024-12-14T23:50:01.388246246Z"
+    }
+  ]
+}

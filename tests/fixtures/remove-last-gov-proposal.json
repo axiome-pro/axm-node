@@ -1,0 +1,10 @@
+{
+  "messages": [
+    {
+      "@type": "/axiome.vote.v1beta1.MsgRemoveGovernor",
+      "authority": "axm1st3365pq4zys825utf4l7hq83mpap6uf27tmps",
+      "governor": "axm1v6xdm93m5s9lvu0ux4k76s2p7hgkzj00u8w5z7"
+    }
+  ],
+  "name": "Test proposal"
+}

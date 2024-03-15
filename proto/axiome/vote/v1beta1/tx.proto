@@ -1,0 +1,128 @@
+syntax = "proto3";
+package axiome.vote.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "amino/amino.proto";
+import "google/protobuf/any.proto";
+import "axiome/vote/v1beta1/types.proto";
+import "axiome/vote/v1beta1/params.proto";
+
+option go_package = "github.com/axiome-pro/axm-node/x/vote/types";
+
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  rpc Propose(MsgPropose) returns (MsgProposeResponse);
+  rpc Vote(MsgVote) returns (MsgVoteResponse);
+  rpc StartPoll(MsgStartPoll) returns (MsgStartPollResponse);
+  rpc AnswerPoll(MsgAnswerPoll) returns (MsgAnswerPollResponse);
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+  rpc AddGovernor(MsgAddGovernor) returns (MsgAddGovernorResponse);
+  rpc RemoveGovernor(MsgRemoveGovernor) returns (MsgRemoveGovernorResponse);
+}
+
+message MsgPropose {
+  option (gogoproto.goproto_getters) = false;
+  option (cosmos.msg.v1.signer) = "author";
+  option (amino.name) = "axiome/v1beta1/MsgPropose";
+
+  repeated google.protobuf.Any messages = 1;
+
+  string author = 2 [
+    (gogoproto.jsontag) = "author",
+    (gogoproto.moretags) = "yaml:\"author\""
+  ];
+
+  string name = 3 [ (gogoproto.moretags) = "yaml:\"name,omitempty\"" ];
+}
+
+message MsgProposeResponse {}
+
+message MsgVote {
+  option (cosmos.msg.v1.signer) = "voter";
+  option (amino.name) = "axiome/v1beta1/MsgVote";
+  option (gogoproto.goproto_getters) = false;
+
+  string voter = 1 [
+    (gogoproto.jsontag) = "voter",
+    (gogoproto.moretags) = "yaml:\"voter\""
+  ];
+  bool agree = 2 [
+    (gogoproto.jsontag) = "agree",
+    (gogoproto.moretags) = "yaml:\"agree\""
+  ];
+}
+
+message MsgVoteResponse {}
+
+message MsgStartPoll {
+  option (cosmos.msg.v1.signer) = "author";
+  option (amino.name) = "axiome/v1beta1/MsgStartPoll";
+
+  Poll poll = 1 [
+    (gogoproto.nullable) = false,
+    (gogoproto.jsontag) = "poll",
+    (gogoproto.moretags) = "yaml:\"poll\""
+  ];
+
+  // Author is the poll creator's SDK address.
+  string author = 2 [
+    (gogoproto.jsontag) = "author",
+    (gogoproto.moretags) = "yaml:\"author\""
+  ];
+}
+
+message MsgStartPollResponse {}
+
+message MsgAnswerPoll {
+  option (cosmos.msg.v1.signer) = "respondent";
+  option (amino.name) = "axiome/v1beta1/MsgAnswerPoll";
+  option (gogoproto.goproto_getters) = false;
+
+  string respondent = 1 [
+    (gogoproto.jsontag) = "respondent",
+    (gogoproto.moretags) = "yaml:\"respondent\""
+  ];
+  bool yes = 2
+      [ (gogoproto.jsontag) = "yes", (gogoproto.moretags) = "yaml:\"yes\"" ];
+}
+
+message MsgAnswerPollResponse {}
+
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "axiome/referral/MsgUpdateParams";
+
+  // authority is the address that controls the module (defaults to x/gov unless
+  // overwritten).
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  Params params = 2
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+}
+
+message MsgUpdateParamsResponse {}
+
+message MsgAddGovernor {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "axiome/referral/MsgAddGovernor";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  string governor = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+message MsgAddGovernorResponse {}
+
+message MsgRemoveGovernor {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "axiome/referral/MsgRemoveGovernor";
+
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  string governor = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+message MsgRemoveGovernorResponse {}

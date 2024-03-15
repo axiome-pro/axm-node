@@ -1,0 +1,23 @@
+syntax = "proto3";
+package axiome.vote.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/axiome-pro/axm-node/x/vote/types";
+
+// Params - used for initializing default parameter for vote at genesis
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+
+  // Time in hours
+  int32 vote_period = 1 [
+    (gogoproto.jsontag) = "vote_period",
+    (gogoproto.moretags) = "yaml:\"vote_period\""
+  ];
+
+  // PollPeriod is a number of hours a poll finishes after
+  int32 poll_period = 2 [
+    (gogoproto.jsontag) = "poll_period",
+    (gogoproto.moretags) = "yaml:\"poll_period\""
+  ];
+}

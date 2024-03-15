@@ -1,0 +1,10 @@
+{
+  "messages": [
+    {
+      "@type": "/axiome.vote.v1beta1.MsgAddGovernor",
+      "authority": "axm1st3365pq4zys825utf4l7hq83mpap6uf27tmps",
+      "governor": "axm1rkk2x2jedsdkmckyrxzjx9tdtavnqwlpqf3yts"
+    }
+  ],
+  "name": "Test proposal"
+}
