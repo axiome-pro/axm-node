@@ -442,3 +442,12 @@ func (k Keeper) PayUpFees(ctx sdk.Context, acc string, totalAmount math.Int) (re
 
 	return remain, nil
 }
+
+func (k Keeper) BurnCoins(ctx sdk.Context, acc sdk.AccAddress, amt sdk.Coins) error {
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, acc, k.referralAccountName, amt)
+	if err != nil {
+		return err
+	}
+
+	return k.bankKeeper.BurnCoins(ctx, k.referralAccountName, amt)
+}

@@ -20,6 +20,27 @@ func NewMsgServer(keeper Keeper) types.MsgServer {
 
 var _ types.MsgServer = msgServer{}
 
+func (k msgServer) BurnPartnerFee(ctx context.Context, msg *types.MsgBurnPartnerFee) (*types.MsgBurnPartnerFeeResponse, error) {
+	from, err := k.accountKeeper.AddressCodec().StringToBytes(msg.FromAddress)
+	if err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid referrer address: %s", err)
+	}
+
+	if !msg.Amount.IsValid() {
+		return nil, errors.Wrap(sdkerrors.ErrInvalidCoins, msg.Amount.String())
+	}
+
+	if !msg.Amount.IsAllPositive() {
+		return nil, errors.Wrap(sdkerrors.ErrInvalidCoins, msg.Amount.String())
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	err = k.BurnCoins(sdkCtx, from, msg.Amount)
+
+	return &types.MsgBurnPartnerFeeResponse{}, err
+}
+
 func (k msgServer) RegisterReferral(ctx context.Context, msg *types.MsgRegisterReferral) (*types.MsgRegisterReferralResponse, error) {
 	_, err := k.accountKeeper.AddressCodec().StringToBytes(msg.ReferrerAddress)
 	if err != nil {

@@ -27,9 +27,52 @@ func NewTxCmd(ac address.Codec) *cobra.Command {
 
 	referralTxCmd.AddCommand(
 		NewRegisterReferralCmd(ac),
+		CmdBurnPartnerFee(),
 	)
 
 	return referralTxCmd
+}
+
+func CmdBurnPartnerFee() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "burn-partner-fee <amount>",
+		Short: "Burn some uAXMs",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Burn some coins from account balance
+
+Example:
+$ %s tx referral burn-partner-fee 1000000uaxm --from mykey
+`,
+				version.AppName,
+			),
+		),
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			coins, err := sdk.ParseCoinsNormalized(args[0])
+			if err != nil {
+				return err
+			}
+
+			if len(coins) == 0 {
+				return fmt.Errorf("invalid coins")
+			}
+
+			msg := types.MsgBurnPartnerFee{
+				FromAddress: clientCtx.GetFromAddress().String(),
+				Amount:      coins,
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
 }
 
 // NewRegisterReferralCmd returns a CLI command handler for creating a MsgRegisterReferral transaction.
