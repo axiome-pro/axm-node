@@ -36,7 +36,7 @@ func (k *Keeper) AllocateValidatorsPoints(ctx context.Context) error {
 		return nil
 	}
 
-	ratio, err := k.BondedRatio(ctx)
+	ratio, err := k.StakedRatio(ctx)
 	if err != nil {
 		return err
 	}

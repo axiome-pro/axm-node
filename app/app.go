@@ -157,6 +157,8 @@ func NewAxmApp(
 
 	/****  Module Options ****/
 
+	app.RegisterUpgradeHandlers()
+
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	// NOTE: this is not required apps that don't use the simulator for fuzz testing transactions
 	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, make(map[string]module.AppModuleSimulation, 0))

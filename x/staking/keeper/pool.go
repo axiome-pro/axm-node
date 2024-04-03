@@ -111,3 +111,35 @@ func (k Keeper) BondedRatio(ctx context.Context) (math.LegacyDec, error) {
 
 	return math.LegacyZeroDec(), nil
 }
+
+// TotalNotBondedTokens total staking tokens supply which is staked but not bonded
+func (k Keeper) TotalNotBondedTokens(ctx context.Context) (math.Int, error) {
+	notBondedPool := k.GetNotBondedPool(ctx)
+	bondDenom, err := k.BondDenom(ctx)
+	if err != nil {
+		return math.ZeroInt(), err
+	}
+	return k.bankKeeper.GetBalance(ctx, notBondedPool.GetAddress(), bondDenom).Amount, nil
+}
+
+func (k Keeper) StakedRatio(ctx context.Context) (math.LegacyDec, error) {
+	stakeSupply, err := k.StakingTokenSupply(ctx)
+	if err != nil {
+		return math.LegacyZeroDec(), err
+	}
+
+	if stakeSupply.IsPositive() {
+		totalBonded, err := k.TotalBondedTokens(ctx)
+		if err != nil {
+			return math.LegacyZeroDec(), err
+		}
+
+		totalNotBonded, err := k.TotalNotBondedTokens(ctx)
+		if err != nil {
+			return math.LegacyZeroDec(), err
+		}
+		return math.LegacyNewDecFromInt(totalBonded).Add(math.LegacyNewDecFromInt(totalNotBonded)).QuoInt(stakeSupply), nil
+	}
+
+	return math.LegacyZeroDec(), nil
+}

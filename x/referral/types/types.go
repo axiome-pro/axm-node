@@ -116,3 +116,13 @@ func (fee ReferralValidatorFee) GetBeneficiary() sdk.AccAddress {
 	}
 	return addr
 }
+
+func (aag ActiveAggregations) Eqals(aag2 ActiveAggregations) bool {
+	return aag.FirstLine == aag2.FirstLine &&
+		aag.FirstLineBy3 == aag2.FirstLineBy3 &&
+		aag.Team0 == aag2.Team0 &&
+		aag.Team15 == aag2.Team15 &&
+		aag.Team50 == aag2.Team50 &&
+		aag.Team100 == aag2.Team100 &&
+		aag.Team300 == aag2.Team300
+}

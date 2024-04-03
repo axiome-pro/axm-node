@@ -1088,6 +1088,7 @@ func (k Keeper) Unbond(
 	if delegation.Shares.IsZero() {
 		err = k.RemoveDelegation(ctx, delegation)
 	} else {
+		delegation.Points = validator.GetPoints()
 		if err = k.SetDelegation(ctx, delegation); err != nil {
 			return amount, err
 		}

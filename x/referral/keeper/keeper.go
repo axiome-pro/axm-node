@@ -184,6 +184,10 @@ func (k Keeper) OnBalanceChanged(ctx sdk.Context, acc string, dd math.Int) error
 	return nil
 }
 
+func ChangeTeamActive(aag *types.ActiveAggregations, teamSize uint64, delta int64) {
+	changeTeamActive(aag, teamSize, delta)
+}
+
 func changeTeamActive(aag *types.ActiveAggregations, teamSize uint64, delta int64) {
 	if teamSize < 15 {
 		aag.Team0 += int32(delta)
@@ -287,8 +291,15 @@ func (k Keeper) SetActive(ctx sdk.Context, acc string, value, checkAncestorsForS
 			if x.Active && parent != "" && oldTeamSize != newTeamSize {
 				err2 := bu.update(parent, checkAncestorsForStatusUpdate, func(y *types.Info) error {
 
-					changeTeamActive(y.ActiveCount, oldTeamSize, -deltaValue)
-					changeTeamActive(y.ActiveCount, newTeamSize, deltaValue)
+					if deltaValue > 0 {
+						changeTeamActive(y.ActiveCount, oldTeamSize, -deltaValue)
+						changeTeamActive(y.ActiveCount, newTeamSize, deltaValue)
+					}
+
+					if deltaValue < 0 {
+						changeTeamActive(y.ActiveCount, oldTeamSize, deltaValue)
+						changeTeamActive(y.ActiveCount, newTeamSize, -deltaValue)
+					}
 
 					return nil
 				})

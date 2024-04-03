@@ -88,8 +88,15 @@ func (k Querier) ValidatorDistributionInfo(ctx context.Context, req *types.Query
 		return nil, err
 	}
 
+	denom, err := k.stakingKeeper.BondDenom(ctx)
+	if err != nil {
+		return nil, err
+	}
+	validatorEmission := sdk.NewDecCoinFromDec(denom, val.GetEmission())
+
 	return &types.QueryValidatorDistributionInfoResponse{
 		Commission:      validatorCommission.Commission,
+		Emission:        sdk.NewDecCoins(validatorEmission),
 		OperatorAddress: delAdr.String(),
 		SelfBondRewards: rewards,
 	}, nil
@@ -155,7 +162,13 @@ func (k Querier) ValidatorCommission(ctx context.Context, req *types.QueryValida
 		return nil, err
 	}
 
-	return &types.QueryValidatorCommissionResponse{Commission: commission}, nil
+	denom, err := k.stakingKeeper.BondDenom(ctx)
+	if err != nil {
+		return nil, err
+	}
+	validatorEmission := sdk.NewDecCoinFromDec(denom, validator.GetEmission())
+
+	return &types.QueryValidatorCommissionResponse{Commission: commission, Emission: sdk.NewDecCoins(validatorEmission)}, nil
 }
 
 // ValidatorSlashes queries slash events of a validator

@@ -10,15 +10,18 @@ $axmd_BIN tx staking delegate $validator 8500000000uaxm --gas auto --gas-adjustm
 $axmd_BIN tx staking delegate $validator 8500000000uaxm --gas auto --gas-adjustment=1.4 --yes --from den
 $axmd_BIN tx staking delegate $validator 8500000000uaxm --gas auto --gas-adjustment=1.4 --yes --from miranda
 #
-## configure axmd
-#$axmd_BIN config set client chain-id demo
-#$axmd_BIN config set client keyring-backend test
-#$axmd_BIN keys add alice
-#$axmd_BIN keys add bob
-#$axmd_BIN init test --chain-id demo --default-denom uaxm
-## update genesis
-#$axmd_BIN genesis add-genesis-account alice 10000000uaxm --keyring-backend test
-#$axmd_BIN genesis add-genesis-account bob 1000uaxm --keyring-backend test
-## create default validator
-#$axmd_BIN genesis gentx alice 1000000uaxm --chain-id demo
-#$axmd_BIN genesis collect-gentxs
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF01
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF02
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF03
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF04
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF05
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF06
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF07
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF08
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF09
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF10
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF11
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF12
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF13
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF14
+$axmd_BIN tx staking delegate $validator 850000000uaxm --gas auto --gas-adjustment=1.4 --yes --from REF15
