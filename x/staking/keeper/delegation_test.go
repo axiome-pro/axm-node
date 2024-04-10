@@ -978,8 +978,8 @@ func (s *KeeperTestSuite) TestRedelegateFromUnbondingValidator() {
 	ubd, err := keeper.GetRedelegation(ctx, addrDels[1], addrVals[0], addrVals[1])
 	require.NoError(err)
 	require.Len(ubd.Entries, 1)
-	require.Equal(blockHeight, ubd.Entries[0].CreationHeight)
-	require.True(blockTime.Add(params.UnbondingTime).Equal(ubd.Entries[0].CompletionTime))
+	require.Equal(blockHeight2, ubd.Entries[0].CreationHeight)
+	require.True(ctx.BlockTime().Add(params.RedelegationTime).Equal(ubd.Entries[0].CompletionTime))
 }
 
 func (s *KeeperTestSuite) TestRedelegateFromUnbondedValidator() {

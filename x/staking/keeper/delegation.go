@@ -834,8 +834,7 @@ func (k Keeper) DequeueAllMatureRedelegationQueue(ctx context.Context, currTime 
 	store := k.storeService.OpenKVStore(ctx)
 
 	// gets an iterator for all timeslices from time 0 until the current Blockheader time
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	redelegationTimesliceIterator, err := k.RedelegationQueueIterator(ctx, sdkCtx.HeaderInfo().Time)
+	redelegationTimesliceIterator, err := k.RedelegationQueueIterator(ctx, currTime)
 	if err != nil {
 		return nil, err
 	}
@@ -1158,6 +1157,10 @@ func (k Keeper) getBeginInfo(
 		return completionTime, height, true, nil
 
 	case validator.IsUnbonding():
+		completionTime = sdkCtx.BlockHeader().Time.Add(unbondingTime)
+		if completionTime.Before(validator.UnbondingTime) {
+			return completionTime, sdkCtx.BlockHeight(), false, nil
+		}
 		return validator.UnbondingTime, validator.UnbondingHeight, false, nil
 
 	default:
