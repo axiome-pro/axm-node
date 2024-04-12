@@ -114,7 +114,7 @@ func upgradeToV103(ctx context.Context, k stakingkeeper.Keeper, accountKeeper au
 
 		red, err := k.GetRedelegation(ctx, delegatorAddress, valSrcAddr, valDstAddr)
 		if err != nil {
-			panic(err)
+			continue
 		}
 
 		// Fix completion time for all entries

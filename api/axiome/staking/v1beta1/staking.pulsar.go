@@ -3,9 +3,9 @@ package stakingv1beta1
 
 import (
 	v1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
+	fmt "fmt"
 	types1 "cosmossdk.io/api/tendermint/abci"
 	types "cosmossdk.io/api/tendermint/types"
-	fmt "fmt"
 	_ "github.com/cosmos/cosmos-proto"
 	runtime "github.com/cosmos/cosmos-proto/runtime"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
