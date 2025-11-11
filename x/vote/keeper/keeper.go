@@ -2,17 +2,18 @@ package keeper
 
 import (
 	"bytes"
+	"encoding/binary"
+	"fmt"
+	"time"
+
 	"cosmossdk.io/collections"
 	corestore "cosmossdk.io/core/store"
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/store/cachekv"
 	storetypes "cosmossdk.io/store/types"
-	"encoding/binary"
-	"fmt"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
-	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
@@ -292,6 +293,7 @@ func (k Keeper) EndProposal(ctx sdk.Context, proposal types.Proposal, agreed boo
 			handler := k.Router().Handler(msg)
 
 			var res *sdk.Result
+			k.Logger(cacheCtx).Error("handling msg", "msg", msg)
 			res, err = safeExecuteHandler(cacheCtx, msg, handler)
 			if err != nil {
 				break

@@ -1,11 +1,12 @@
 package cli
 
 import (
-	"cosmossdk.io/math"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	"cosmossdk.io/math"
 
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
@@ -48,6 +49,7 @@ func NewTxCmd(valAddrCodec, ac address.Codec) *cobra.Command {
 		NewRedelegateCmd(valAddrCodec, ac),
 		NewUnbondCmd(valAddrCodec, ac),
 		NewCancelUnbondingDelegation(valAddrCodec, ac),
+		NewRequestStakeMoveCmd(valAddrCodec, ac),
 	)
 
 	return stakingTxCmd
@@ -544,4 +546,53 @@ func BuildCreateValidatorMsg(clientCtx client.Context, config TxCreateValidatorC
 	}
 
 	return txBldr, msg, nil
+}
+
+// NewRequestStakeMoveCmd returns a CLI command handler for creating a MsgRequestStakeMove transaction.
+func NewRequestStakeMoveCmd(valAddrCodec, ac address.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "request-stake-move [validator-addr] [dst-delegator-addr]",
+		Short: "Request to move your delegation from a validator to another delegator (starts a vote)",
+		Args:  cobra.ExactArgs(2),
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Start a vote to move your delegation bonded to a validator to a different delegator address.
+
+Example:
+$ %s tx staking request-stake-move cosmosvaloper1... cosmos1dstdelegator... --from mykey`,
+				version.AppName,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			// the delegator is the --from address
+			delegatorAddr, err := ac.BytesToString(clientCtx.GetFromAddress())
+			if err != nil {
+				return err
+			}
+
+			// validate provided validator address
+			if _, err := valAddrCodec.StringToBytes(args[0]); err != nil {
+				return err
+			}
+			// validate destination delegator address format
+			if _, err := ac.StringToBytes(args[1]); err != nil {
+				return err
+			}
+
+			msg := &types.MsgRequestStakeMove{
+				DelegatorAddress:    delegatorAddr,
+				ValidatorAddress:    args[0],
+				DstDelegatorAddress: args[1],
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+	return cmd
 }

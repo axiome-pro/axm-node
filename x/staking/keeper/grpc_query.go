@@ -27,6 +27,34 @@ func NewQuerier(keeper *Keeper) Querier {
 	return Querier{Keeper: keeper}
 }
 
+// StakeMoveVoting returns whether stake move voting is in progress for a delegator-validator pair
+func (k Querier) StakeMoveVoting(ctx context.Context, req *types.QueryStakeMoveVotingRequest) (*types.QueryStakeMoveVotingResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.DelegatorAddr == "" {
+		return nil, status.Error(codes.InvalidArgument, "delegator address cannot be empty")
+	}
+	if req.ValidatorAddr == "" {
+		return nil, status.Error(codes.InvalidArgument, "validator address cannot be empty")
+	}
+
+	delAddr, err := k.authKeeper.AddressCodec().StringToBytes(req.DelegatorAddr)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid delegator address: %v", err)
+	}
+	valAddr, err := k.validatorAddressCodec.StringToBytes(req.ValidatorAddr)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid validator address: %v", err)
+	}
+
+	inProgress, err := k.IsStakeMoveVoting(ctx, delAddr, valAddr)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &types.QueryStakeMoveVotingResponse{InProgress: inProgress}, nil
+}
+
 // EmissionRate query current emission rate
 func (k Querier) EmissionRate(ctx context.Context, _ *types.QueryEmissionRateRequest) (*types.QueryEmissionRateResponse, error) {
 	ratio, err := k.BondedRatio(ctx)

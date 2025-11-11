@@ -1,10 +1,12 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
-	"github.com/pkg/errors"
 	"strconv"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/hashicorp/go-metrics"
 	"google.golang.org/grpc/codes"
@@ -350,6 +352,15 @@ func (k msgServer) Undelegate(ctx context.Context, msg *types.MsgUndelegate) (*t
 		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid delegator address: %s", err)
 	}
 
+	// Reject undelegation if a stake move voting is in progress for this delegator-validator pair
+	inProgress, ierr := k.IsStakeMoveVoting(ctx, delegatorAddress, addr)
+	if ierr != nil {
+		return nil, ierr
+	}
+	if inProgress {
+		return nil, errorsmod.Wrap(sdkerrors.ErrConflict, "stake move voting is in progress for this delegator and validator")
+	}
+
 	if !msg.Amount.IsValid() || !msg.Amount.Amount.IsPositive() {
 		return nil, errorsmod.Wrap(
 			sdkerrors.ErrInvalidRequest,
@@ -554,4 +565,154 @@ func (k msgServer) UpdateParams(ctx context.Context, msg *types.MsgUpdateParams)
 	}
 
 	return &types.MsgUpdateParamsResponse{}, nil
+}
+
+// RequestStakeMove starts a voting process to move delegator's stake from one delegator to another.
+// It sets a flag in store for (delegator, validator) pair indicating that voting is in progress.
+func (k msgServer) RequestStakeMove(ctx context.Context, msg *types.MsgRequestStakeMove) (*types.MsgRequestStakeMoveResponse, error) {
+	// basic address validation
+	delAddr, err := k.authKeeper.AddressCodec().StringToBytes(msg.DelegatorAddress)
+	if err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid delegator address: %s", err)
+	}
+	valAddr, err := k.validatorAddressCodec.StringToBytes(msg.ValidatorAddress)
+	if err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid validator address: %s", err)
+	}
+	// destination delegator address also must be valid
+	if _, err := k.authKeeper.AddressCodec().StringToBytes(msg.DstDelegatorAddress); err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid destination delegator address: %s", err)
+	}
+
+	// delegator must not be the validator operator
+	if bytes.Equal(delAddr, valAddr) {
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "delegator cannot be the validator operator")
+	}
+
+	// check if already voting
+	inProgress, err := k.IsStakeMoveVoting(ctx, delAddr, valAddr)
+	if err != nil {
+		return nil, err
+	}
+	if inProgress {
+		return nil, errorsmod.Wrap(sdkerrors.ErrConflict, "stake move voting is already in progress for this delegator and validator")
+	}
+
+	if err := k.SetStakeMoveVoting(ctx, delAddr, valAddr); err != nil {
+		return nil, err
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			"request_stake_move",
+			sdk.NewAttribute(types.AttributeKeyDelegator, msg.DelegatorAddress),
+			sdk.NewAttribute(types.AttributeKeyValidator, msg.ValidatorAddress),
+			sdk.NewAttribute("dst_delegator", msg.DstDelegatorAddress),
+		),
+	)
+
+	return &types.MsgRequestStakeMoveResponse{}, nil
+}
+
+// ConfirmRequestStakeMove confirms the previously requested stake move and clears the voting flag.
+func (k msgServer) ConfirmRequestStakeMove(ctx context.Context, msg *types.MsgConfirmRequestStakeMove) (*types.MsgConfirmRequestStakeMoveResponse, error) {
+	// authority check
+	if k.authority != msg.Authority {
+		return nil, errorsmod.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, msg.Authority)
+	}
+
+	// basic address validation
+	delAddr, err := k.authKeeper.AddressCodec().StringToBytes(msg.DelegatorAddress)
+	if err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid delegator address: %s", err)
+	}
+	valAddr, err := k.validatorAddressCodec.StringToBytes(msg.ValidatorAddress)
+	if err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid validator address: %s", err)
+	}
+	// destination delegator address must be valid too
+	if _, err := k.authKeeper.AddressCodec().StringToBytes(msg.DstDelegatorAddress); err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid destination delegator address: %s", err)
+	}
+
+	// Only proceed if voting flag exists; if not, return not found
+	inProgress, err := k.IsStakeMoveVoting(ctx, delAddr, valAddr)
+	if err != nil {
+		return nil, err
+	}
+	if !inProgress {
+		return nil, status.Errorf(codes.NotFound, "no stake move voting in progress for this delegator and validator")
+	}
+
+	// Perform the stake move
+	if err := k.MoveDelegation(ctx, msg.DelegatorAddress, msg.DstDelegatorAddress, msg.ValidatorAddress); err != nil {
+		k.Logger(ctx).Error("failed to move delegation", "delegator", msg.DelegatorAddress, "validator", msg.ValidatorAddress, "dst_delegator", msg.DstDelegatorAddress, "err", err)
+		return nil, err
+	}
+
+	// Clear the voting flag only after successful move
+	if err := k.DeleteStakeMoveVoting(ctx, delAddr, valAddr); err != nil {
+		return nil, err
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			"confirm_request_stake_move",
+			sdk.NewAttribute(types.AttributeKeyDelegator, msg.DelegatorAddress),
+			sdk.NewAttribute(types.AttributeKeyValidator, msg.ValidatorAddress),
+			sdk.NewAttribute("dst_delegator", msg.DstDelegatorAddress),
+		),
+	)
+
+	return &types.MsgConfirmRequestStakeMoveResponse{}, nil
+}
+
+// CancelRequestStakeMove cancels an ongoing stake move voting and clears the voting flag without moving any stake.
+func (k msgServer) CancelRequestStakeMove(ctx context.Context, msg *types.MsgCancelRequestStakeMove) (*types.MsgCancelRequestStakeMoveResponse, error) {
+	// authority check
+	if k.authority != msg.Authority {
+		return nil, errorsmod.Wrapf(govtypes.ErrInvalidSigner, "invalid authority; expected %s, got %s", k.authority, msg.Authority)
+	}
+
+	// basic address validation
+	delAddr, err := k.authKeeper.AddressCodec().StringToBytes(msg.DelegatorAddress)
+	if err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid delegator address: %s", err)
+	}
+	valAddr, err := k.validatorAddressCodec.StringToBytes(msg.ValidatorAddress)
+	if err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid validator address: %s", err)
+	}
+	// destination delegator address must be valid too (even though we don't use it in store key)
+	if _, err := k.authKeeper.AddressCodec().StringToBytes(msg.DstDelegatorAddress); err != nil {
+		return nil, sdkerrors.ErrInvalidAddress.Wrapf("invalid destination delegator address: %s", err)
+	}
+
+	// Ensure there is a voting flag to cancel
+	inProgress, err := k.IsStakeMoveVoting(ctx, delAddr, valAddr)
+	if err != nil {
+		return nil, err
+	}
+	if !inProgress {
+		return nil, status.Errorf(codes.NotFound, "no stake move voting in progress for this delegator and validator")
+	}
+
+	// Clear the voting flag
+	if err := k.DeleteStakeMoveVoting(ctx, delAddr, valAddr); err != nil {
+		return nil, err
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	sdkCtx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			"cancel_request_stake_move",
+			sdk.NewAttribute(types.AttributeKeyDelegator, msg.DelegatorAddress),
+			sdk.NewAttribute(types.AttributeKeyValidator, msg.ValidatorAddress),
+			sdk.NewAttribute("dst_delegator", msg.DstDelegatorAddress),
+		),
+	)
+
+	return &types.MsgCancelRequestStakeMoveResponse{}, nil
 }

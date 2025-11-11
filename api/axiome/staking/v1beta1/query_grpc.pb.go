@@ -34,6 +34,7 @@ const (
 	Query_Pool_FullMethodName                          = "/axiome.staking.v1beta1.Query/Pool"
 	Query_Params_FullMethodName                        = "/axiome.staking.v1beta1.Query/Params"
 	Query_EmissionRate_FullMethodName                  = "/axiome.staking.v1beta1.Query/EmissionRate"
+	Query_StakeMoveVoting_FullMethodName               = "/axiome.staking.v1beta1.Query/StakeMoveVoting"
 )
 
 // QueryClient is the client API for Query service.
@@ -95,6 +96,9 @@ type QueryClient interface {
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
 	// Parameters queries the staking parameters.
 	EmissionRate(ctx context.Context, in *QueryEmissionRateRequest, opts ...grpc.CallOption) (*QueryEmissionRateResponse, error)
+	// StakeMoveVoting returns whether stake move voting is in progress for a
+	// delegator-validator pair.
+	StakeMoveVoting(ctx context.Context, in *QueryStakeMoveVotingRequest, opts ...grpc.CallOption) (*QueryStakeMoveVotingResponse, error)
 }
 
 type queryClient struct {
@@ -240,6 +244,15 @@ func (c *queryClient) EmissionRate(ctx context.Context, in *QueryEmissionRateReq
 	return out, nil
 }
 
+func (c *queryClient) StakeMoveVoting(ctx context.Context, in *QueryStakeMoveVotingRequest, opts ...grpc.CallOption) (*QueryStakeMoveVotingResponse, error) {
+	out := new(QueryStakeMoveVotingResponse)
+	err := c.cc.Invoke(ctx, Query_StakeMoveVoting_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
@@ -299,6 +312,9 @@ type QueryServer interface {
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
 	// Parameters queries the staking parameters.
 	EmissionRate(context.Context, *QueryEmissionRateRequest) (*QueryEmissionRateResponse, error)
+	// StakeMoveVoting returns whether stake move voting is in progress for a
+	// delegator-validator pair.
+	StakeMoveVoting(context.Context, *QueryStakeMoveVotingRequest) (*QueryStakeMoveVotingResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -350,6 +366,9 @@ func (UnimplementedQueryServer) Params(context.Context, *QueryParamsRequest) (*Q
 }
 func (UnimplementedQueryServer) EmissionRate(context.Context, *QueryEmissionRateRequest) (*QueryEmissionRateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EmissionRate not implemented")
+}
+func (UnimplementedQueryServer) StakeMoveVoting(context.Context, *QueryStakeMoveVotingRequest) (*QueryStakeMoveVotingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StakeMoveVoting not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -634,6 +653,24 @@ func _Query_EmissionRate_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_StakeMoveVoting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryStakeMoveVotingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).StakeMoveVoting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_StakeMoveVoting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).StakeMoveVoting(ctx, req.(*QueryStakeMoveVotingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -700,6 +737,10 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EmissionRate",
 			Handler:    _Query_EmissionRate_Handler,
+		},
+		{
+			MethodName: "StakeMoveVoting",
+			Handler:    _Query_StakeMoveVoting_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

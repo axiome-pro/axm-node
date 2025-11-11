@@ -26,6 +26,9 @@ const (
 	Msg_Undelegate_FullMethodName                = "/axiome.staking.v1beta1.Msg/Undelegate"
 	Msg_CancelUnbondingDelegation_FullMethodName = "/axiome.staking.v1beta1.Msg/CancelUnbondingDelegation"
 	Msg_UpdateParams_FullMethodName              = "/axiome.staking.v1beta1.Msg/UpdateParams"
+	Msg_RequestStakeMove_FullMethodName          = "/axiome.staking.v1beta1.Msg/RequestStakeMove"
+	Msg_ConfirmRequestStakeMove_FullMethodName   = "/axiome.staking.v1beta1.Msg/ConfirmRequestStakeMove"
+	Msg_CancelRequestStakeMove_FullMethodName    = "/axiome.staking.v1beta1.Msg/CancelRequestStakeMove"
 )
 
 // MsgClient is the client API for Msg service.
@@ -54,6 +57,15 @@ type MsgClient interface {
 	// parameters.
 	// Since: cosmos-sdk 0.47
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
+	// RequestStakeMove defines a method to start a voting process to move
+	// delegator's stake to another delegator address.
+	RequestStakeMove(ctx context.Context, in *MsgRequestStakeMove, opts ...grpc.CallOption) (*MsgRequestStakeMoveResponse, error)
+	// ConfirmRequestStakeMove defines a method for the authority to confirm
+	// a previously requested stake move.
+	ConfirmRequestStakeMove(ctx context.Context, in *MsgConfirmRequestStakeMove, opts ...grpc.CallOption) (*MsgConfirmRequestStakeMoveResponse, error)
+	// CancelRequestStakeMove defines a method for the authority to cancel
+	// a previously requested stake move.
+	CancelRequestStakeMove(ctx context.Context, in *MsgCancelRequestStakeMove, opts ...grpc.CallOption) (*MsgCancelRequestStakeMoveResponse, error)
 }
 
 type msgClient struct {
@@ -127,6 +139,33 @@ func (c *msgClient) UpdateParams(ctx context.Context, in *MsgUpdateParams, opts 
 	return out, nil
 }
 
+func (c *msgClient) RequestStakeMove(ctx context.Context, in *MsgRequestStakeMove, opts ...grpc.CallOption) (*MsgRequestStakeMoveResponse, error) {
+	out := new(MsgRequestStakeMoveResponse)
+	err := c.cc.Invoke(ctx, Msg_RequestStakeMove_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) ConfirmRequestStakeMove(ctx context.Context, in *MsgConfirmRequestStakeMove, opts ...grpc.CallOption) (*MsgConfirmRequestStakeMoveResponse, error) {
+	out := new(MsgConfirmRequestStakeMoveResponse)
+	err := c.cc.Invoke(ctx, Msg_ConfirmRequestStakeMove_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) CancelRequestStakeMove(ctx context.Context, in *MsgCancelRequestStakeMove, opts ...grpc.CallOption) (*MsgCancelRequestStakeMoveResponse, error) {
+	out := new(MsgCancelRequestStakeMoveResponse)
+	err := c.cc.Invoke(ctx, Msg_CancelRequestStakeMove_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility
@@ -153,6 +192,15 @@ type MsgServer interface {
 	// parameters.
 	// Since: cosmos-sdk 0.47
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
+	// RequestStakeMove defines a method to start a voting process to move
+	// delegator's stake to another delegator address.
+	RequestStakeMove(context.Context, *MsgRequestStakeMove) (*MsgRequestStakeMoveResponse, error)
+	// ConfirmRequestStakeMove defines a method for the authority to confirm
+	// a previously requested stake move.
+	ConfirmRequestStakeMove(context.Context, *MsgConfirmRequestStakeMove) (*MsgConfirmRequestStakeMoveResponse, error)
+	// CancelRequestStakeMove defines a method for the authority to cancel
+	// a previously requested stake move.
+	CancelRequestStakeMove(context.Context, *MsgCancelRequestStakeMove) (*MsgCancelRequestStakeMoveResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -180,6 +228,15 @@ func (UnimplementedMsgServer) CancelUnbondingDelegation(context.Context, *MsgCan
 }
 func (UnimplementedMsgServer) UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateParams not implemented")
+}
+func (UnimplementedMsgServer) RequestStakeMove(context.Context, *MsgRequestStakeMove) (*MsgRequestStakeMoveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RequestStakeMove not implemented")
+}
+func (UnimplementedMsgServer) ConfirmRequestStakeMove(context.Context, *MsgConfirmRequestStakeMove) (*MsgConfirmRequestStakeMoveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmRequestStakeMove not implemented")
+}
+func (UnimplementedMsgServer) CancelRequestStakeMove(context.Context, *MsgCancelRequestStakeMove) (*MsgCancelRequestStakeMoveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelRequestStakeMove not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 
@@ -320,6 +377,60 @@ func _Msg_UpdateParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_RequestStakeMove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRequestStakeMove)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RequestStakeMove(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RequestStakeMove_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RequestStakeMove(ctx, req.(*MsgRequestStakeMove))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_ConfirmRequestStakeMove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgConfirmRequestStakeMove)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ConfirmRequestStakeMove(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_ConfirmRequestStakeMove_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ConfirmRequestStakeMove(ctx, req.(*MsgConfirmRequestStakeMove))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_CancelRequestStakeMove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCancelRequestStakeMove)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CancelRequestStakeMove(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_CancelRequestStakeMove_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CancelRequestStakeMove(ctx, req.(*MsgCancelRequestStakeMove))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -354,6 +465,18 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateParams",
 			Handler:    _Msg_UpdateParams_Handler,
+		},
+		{
+			MethodName: "RequestStakeMove",
+			Handler:    _Msg_RequestStakeMove_Handler,
+		},
+		{
+			MethodName: "ConfirmRequestStakeMove",
+			Handler:    _Msg_ConfirmRequestStakeMove_Handler,
+		},
+		{
+			MethodName: "CancelRequestStakeMove",
+			Handler:    _Msg_CancelRequestStakeMove_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

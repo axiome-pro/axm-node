@@ -137,6 +137,22 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:     "Query the current staking parameters information",
 					Long:      "Query values set as staking parameters.",
 				},
+				{
+					RpcMethod: "EmissionRate",
+					Use:       "emission-rate",
+					Short:     "Query the current token emission rate",
+					Long:      "Query the current emission rate configured in the staking module.",
+				},
+				{
+					RpcMethod: "StakeMoveVoting",
+					Use:       "stake-move-voting [delegator-addr] [validator-addr]",
+					Short:     "Query whether stake move voting is in progress for a delegator-validator pair",
+					Example:   fmt.Sprintf("$ %s query staking stake-move-voting [delegator-addr] [validator-addr]", version.AppName),
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "delegator_addr"},
+						{ProtoField: "validator_addr"},
+					},
+				},
 			},
 		},
 		Tx: &autocliv1.ServiceCommandDescriptor{

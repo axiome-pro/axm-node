@@ -108,30 +108,30 @@ $axmd_BIN init test --chain-id demo --default-denom uaxm
 
 # update genesis
 $axmd_BIN genesis add-genesis-account alice 100000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account ann 10000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account ben 10000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account bob 10000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account den 10000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account miranda 10000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account polly 10000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account tom 10000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account joe 1000000000uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account ann 100000000uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account ben 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account bob 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account den 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account miranda 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account polly 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account tom 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account joe 100uaxm --keyring-backend test
 
-$axmd_BIN genesis add-genesis-account REF01 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF02 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF03 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF04 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF05 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF06 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF07 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF08 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF09 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF10 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF11 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF12 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF13 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF14 1000000000uaxm --keyring-backend test
-$axmd_BIN genesis add-genesis-account REF15 1000000000uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF01 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF02 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF03 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF04 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF05 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF06 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF07 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF08 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF09 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF10 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF11 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF12 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF13 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF14 100uaxm --keyring-backend test
+$axmd_BIN genesis add-genesis-account REF15 100uaxm --keyring-backend test
 
 # vote gov module params
 jq '.app_state.vote.government = ["axm1v6xdm93m5s9lvu0ux4k76s2p7hgkzj00u8w5z7"]' ~/.axmd/config/genesis.json > ~/.axmd/config/tmp_genesis.json

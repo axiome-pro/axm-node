@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -192,4 +193,131 @@ func (k Keeper) GetValidatorUpdates(ctx context.Context) ([]abci.ValidatorUpdate
 	}
 
 	return valUpdates.Updates, nil
+}
+
+// SetStakeMoveVoting marks a delegator-validator pair as having an ongoing vote
+func (k Keeper) SetStakeMoveVoting(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
+	store := k.storeService.OpenKVStore(ctx)
+	key := types.GetStakeMoveVotingKey(delAddr, valAddr)
+	// store presence with a single byte
+	return store.Set(key, []byte{1})
+}
+
+// DeleteStakeMoveVoting removes the ongoing vote mark for a delegator-validator pair
+func (k Keeper) DeleteStakeMoveVoting(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
+	store := k.storeService.OpenKVStore(ctx)
+	key := types.GetStakeMoveVotingKey(delAddr, valAddr)
+	return store.Delete(key)
+}
+
+// IsStakeMoveVoting checks if there is an ongoing vote for the delegator-validator pair
+func (k Keeper) IsStakeMoveVoting(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) (bool, error) {
+	store := k.storeService.OpenKVStore(ctx)
+	key := types.GetStakeMoveVotingKey(delAddr, valAddr)
+	bz, err := store.Get(key)
+	if err != nil {
+		return false, err
+	}
+	return bz != nil, nil
+}
+
+// MoveDelegation transfers entire delegation shares from src delegator to dst delegator for a given validator.
+// Steps:
+// 1) Withdraw rewards for src delegator-validator; if dst already delegates to validator, withdraw its rewards too.
+// 2) Call referral hooks to decrease src amount and increase dst amount.
+// 3) Remove src delegation record.
+// 4) Create or update dst delegation with moved shares and update points.
+// 5) Invoke staking hooks Before/After delegation changes as appropriate.
+func (k Keeper) MoveDelegation(ctx context.Context, srcDelegator, dstDelegator, validatorOper string) error {
+	// convert addresses
+	srcAcc, err := k.authKeeper.AddressCodec().StringToBytes(srcDelegator)
+	if err != nil {
+		return err
+	}
+	dstAcc, err := k.authKeeper.AddressCodec().StringToBytes(dstDelegator)
+	if err != nil {
+		return err
+	}
+	valAddr, err := k.validatorAddressCodec.StringToBytes(validatorOper)
+	if err != nil {
+		return err
+	}
+
+	// load validator and delegations
+	val, err := k.GetValidator(ctx, valAddr)
+	if err != nil {
+		return err
+	}
+
+	srcDel, err := k.GetDelegation(ctx, srcAcc, valAddr)
+	if err != nil {
+		return err
+	}
+
+	// calculate source coins amount
+	oldSrcCoins := val.TokensFromSharesTruncated(srcDel.GetShares()).TruncateInt()
+
+	// check dst delegation existence and current coins
+	dstDel, err := k.GetDelegation(ctx, dstAcc, valAddr)
+	dstExists := (err == nil)
+	if err != nil && !errors.Is(err, types.ErrNoDelegation) {
+		return err
+	}
+	oldDstCoins := math.ZeroInt()
+	if dstExists {
+		oldDstCoins = val.TokensFromSharesTruncated(dstDel.GetShares()).TruncateInt()
+	}
+
+	// 1) withdraw rewards for src, and for dst if exists
+	if err := k.Hooks().BeforeDelegationSharesModified(ctx, srcAcc, valAddr); err != nil {
+		return err
+	}
+	if dstExists {
+		if err := k.Hooks().BeforeDelegationSharesModified(ctx, dstAcc, valAddr); err != nil {
+			return err
+		}
+	} else {
+		// signal creation for distribution periods when creating new delegation
+		if err := k.Hooks().BeforeDelegationCreated(ctx, dstAcc, valAddr); err != nil {
+			return err
+		}
+	}
+
+	// 2) referral hooks updates
+	if err := k.RefHooks().DelegationCoinsModified(ctx, srcDelegator, validatorOper, oldSrcCoins, math.ZeroInt()); err != nil {
+		return err
+	}
+	newDstCoins := oldDstCoins.Add(oldSrcCoins)
+	if err := k.RefHooks().DelegationCoinsModified(ctx, dstDelegator, validatorOper, oldDstCoins, newDstCoins); err != nil {
+		return err
+	}
+
+	// 3) remove src delegation (record only)
+	if err := k.RemoveDelegation(ctx, srcDel); err != nil {
+		return err
+	}
+
+	// 4) update/create dst delegation with moved shares and points
+	if !dstExists {
+		// create new delegation
+		newDel := types.NewDelegation(dstDelegator, validatorOper, srcDel.GetShares())
+		newDel.Points = val.Points
+		if err := k.SetDelegation(ctx, newDel); err != nil {
+			return err
+		}
+	} else {
+		// update existing
+		dstDel.Shares = dstDel.Shares.Add(srcDel.GetShares())
+		dstDel.Points = val.Points
+		if err := k.SetDelegation(ctx, dstDel); err != nil {
+			return err
+		}
+	}
+
+	// 5) staking hooks after modification for dst
+	if err := k.Hooks().AfterDelegationModified(ctx, dstAcc, valAddr); err != nil {
+		return err
+	}
+
+	return nil
 }

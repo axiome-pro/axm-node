@@ -56,6 +56,9 @@ var (
 	ParamsKey = []byte{0x51} // prefix for parameters for module x/staking
 
 	DelegationByValIndexKey = []byte{0x71} // key for delegations by a validator
+
+	// StakeMoveVotingKey is the prefix for marking a (delegator, validator) pair as having an ongoing vote
+	StakeMoveVotingKey = []byte{0x81}
 )
 
 // UnbondingType defines the type of unbonding operation
@@ -257,6 +260,14 @@ func ParseDelegationsByValKey(bz []byte) (sdk.ValAddress, sdk.AccAddress, error)
 // GetDelegationsKey creates the prefix for a delegator for all validators
 func GetDelegationsKey(delAddr sdk.AccAddress) []byte {
 	return append(DelegationKey, address.MustLengthPrefix(delAddr)...)
+}
+
+// GetStakeMoveVotingKey returns the key for (delegator, validator) stake-move voting flag
+// VALUE: empty or single byte presence flag
+func GetStakeMoveVotingKey(delAddr sdk.AccAddress, valAddr sdk.ValAddress) []byte {
+	key := append(StakeMoveVotingKey, address.MustLengthPrefix(delAddr)...)
+	key = append(key, address.MustLengthPrefix(valAddr)...)
+	return key
 }
 
 // GetUBDKey creates the key for an unbonding delegation by delegator and validator addr

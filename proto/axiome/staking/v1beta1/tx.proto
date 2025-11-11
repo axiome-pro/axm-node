@@ -46,6 +46,21 @@ service Msg {
   // parameters.
   // Since: cosmos-sdk 0.47
   rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // RequestStakeMove defines a method to start a voting process to move
+  // delegator's stake to another delegator address.
+  rpc RequestStakeMove(MsgRequestStakeMove)
+      returns (MsgRequestStakeMoveResponse);
+
+  // ConfirmRequestStakeMove defines a method for the authority to confirm
+  // a previously requested stake move.
+  rpc ConfirmRequestStakeMove(MsgConfirmRequestStakeMove)
+      returns (MsgConfirmRequestStakeMoveResponse);
+
+  // CancelRequestStakeMove defines a method for the authority to cancel
+  // a previously requested stake move.
+  rpc CancelRequestStakeMove(MsgCancelRequestStakeMove)
+      returns (MsgCancelRequestStakeMoveResponse);
 }
 
 // MsgCreateValidator defines a SDK message for creating a new validator.
@@ -225,3 +240,60 @@ message MsgUpdateParams {
 //
 // Since: cosmos-sdk 0.47
 message MsgUpdateParamsResponse {};
+
+// MsgRequestStakeMove defines a SDK message for starting a vote
+// for moving address delegation to another address
+message MsgRequestStakeMove {
+  option (cosmos.msg.v1.signer) = "delegator_address";
+  option (amino.name) = "axiome/staking/MsgRequestStakeMove";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string delegator_address = 1
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string validator_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.ValidatorAddressString" ];
+  string dst_delegator_address = 3
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+message MsgRequestStakeMoveResponse {}
+
+message MsgConfirmRequestStakeMove {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "axiome/staking/MsgConfirmRequestStakeMove";
+
+  // authority is the address that controls the module (defaults to x/gov unless
+  // overwritten).
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // params defines the x/staking parameters to update.
+  //
+  string delegator_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string validator_address = 3
+      [ (cosmos_proto.scalar) = "cosmos.ValidatorAddressString" ];
+  string dst_delegator_address = 4
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+};
+
+message MsgConfirmRequestStakeMoveResponse {}
+
+message MsgCancelRequestStakeMove {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "axiome/staking/MsgCancelRequestStakeMove";
+
+  // authority is the address that controls the module (defaults to x/gov unless
+  // overwritten).
+  string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // params defines the x/staking parameters to update.
+  //
+  string delegator_address = 2
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string validator_address = 3
+      [ (cosmos_proto.scalar) = "cosmos.ValidatorAddressString" ];
+  string dst_delegator_address = 4
+      [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+};
+
+message MsgCancelRequestStakeMoveResponse {}

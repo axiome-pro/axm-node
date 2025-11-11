@@ -2783,7 +2783,8 @@ func (*MsgUpdateParamsResponse) Descriptor() ([]byte, []int) {
 	return file_axiome_referral_v1beta1_tx_proto_rawDescGZIP(), []int{3}
 }
 
-// MsgBurnPartnerFee is a message to burn coins on sender's account, meanwhile for burning partner fees or etc.
+// MsgBurnPartnerFee is a message to burn coins on sender's account, meanwhile
+// for burning partner fees or etc.
 type MsgBurnPartnerFee struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2828,7 +2829,8 @@ func (x *MsgBurnPartnerFee) GetAmount() []*v1beta1.Coin {
 	return nil
 }
 
-// MsgBurnPartnerFeeResponse defines response type for MsgBurnPartnerFee messages.
+// MsgBurnPartnerFeeResponse defines response type for MsgBurnPartnerFee
+// messages.
 type MsgBurnPartnerFeeResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
