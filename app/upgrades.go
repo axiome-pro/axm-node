@@ -1,11 +1,12 @@
 package app
 
 import (
+	"context"
+
 	"github.com/axiome-pro/axm-node/x/referral"
 	"github.com/axiome-pro/axm-node/x/referral/keeper"
 	stakingkeeper "github.com/axiome-pro/axm-node/x/staking/keeper"
 	stakingtypes "github.com/axiome-pro/axm-node/x/staking/types"
-	"context"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -16,6 +17,7 @@ import (
 
 const UpgradeNameV102 = "v1.0.2"
 const UpgradeNameV103 = "v1.0.3"
+const UpgradeNameV104 = "v1.0.4"
 
 func (app *AxmApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
@@ -36,6 +38,13 @@ func (app *AxmApp) RegisterUpgradeHandlers() {
 			if err != nil {
 				return nil, err
 			}
+			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
+		},
+	)
+
+	app.UpgradeKeeper.SetUpgradeHandler(
+		UpgradeNameV104,
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
 		},
 	)
