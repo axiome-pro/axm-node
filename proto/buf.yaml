@@ -1,9 +1,10 @@
 version: v1
 deps:
-  - buf.build/cosmos/cosmos-sdk
-  - buf.build/cosmos/cosmos-proto
+  - buf.build/cosmos/cosmos-sdk:cf13c7d232dd405180c2af616fa8a075
+  - buf.build/cosmos/cosmos-proto:1935555c206d4afb9e94615dfd0fad31
   - buf.build/cosmos/gogo-proto
   - buf.build/googleapis/googleapis
+  - buf.build/cosmwasm/wasmd:6f4f25f158344123aaf16b2019d36ed4
 breaking:
   use:
     - FILE

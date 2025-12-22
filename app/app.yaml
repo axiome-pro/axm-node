@@ -7,11 +7,11 @@ modules:
       # During begin block slashing happens after distr.BeginBlocker so that
       # there is nothing left over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
       # NOTE: staking module is required if HistoricalEntries param > 0
-      begin_blockers: [ upgrade, distribution, slashing, staking, referral, vote ]
-      end_blockers: [ staking ]
+      begin_blockers: [ upgrade, distribution, slashing, staking, referral, vote, wasm, authz ]
+      end_blockers: [ staking, wasm, feegrant ]
       # NOTE: The genutils module must occur after staking so that pools are properly initialized with tokens from genesis accounts.
       # NOTE: The genutils module must also occur after auth so that it can access the params from auth.
-      init_genesis: [ auth, bank, distribution, referral, staking, slashing, vote, genutil, upgrade ]
+      init_genesis: [ auth, authz, bank, feegrant, distribution, referral, staking, slashing, vote, genutil, upgrade, wasm ]
       override_store_keys:
         - module_name: auth
           kv_store_key: acc
@@ -37,6 +37,12 @@ modules:
       blocked_module_accounts_override:
         [ auth, distribution, bonded_tokens_pool, not_bonded_tokens_pool ]
       authority: vote
+  - name: authz
+    config:
+      "@type": cosmos.authz.module.v1.Module
+  - name: feegrant
+    config:
+      "@type": cosmos.feegrant.module.v1.Module
   - name: staking
     config:
       "@type": axiome.staking.module.v1.Module
@@ -71,3 +77,7 @@ modules:
   - name: tx
     config:
       "@type": cosmos.tx.config.v1.Config
+  - name: wasm
+    config:
+      "@type": axiome.wasm.module.v1.Module
+      authority: vote

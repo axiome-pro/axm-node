@@ -129,6 +129,7 @@ func ProvideClientContext(
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithHomeDir(app.DefaultNodeHome).
+		// TODO: check if we can change it to MINI without errors
 		WithViper("MINI") // env variable prefix
 
 	// Read the config again to overwrite the default values with the values from the config file

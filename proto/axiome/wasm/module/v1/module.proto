@@ -1,0 +1,18 @@
+syntax = "proto3";
+package axiome.wasm.module.v1;
+
+import "cosmos/app/v1alpha1/module.proto";
+
+option go_package = "github.com/CosmWasm/wasmd/x/wasm/types;types";
+
+message Module {
+  option (cosmos.app.v1alpha1.module) = {
+    go_import : "github.com/CosmWasm/wasmd/x/wasm/types"
+  };
+  // authority defines the custom module authority. If not set, defaults to the
+  // governance module.
+  string authority = 1;
+  //  bool wasm_enabled = 2;
+  //  uint64 max_contract_size = 3;
+  // при необходимости — другие параметры
+}

@@ -149,5 +149,10 @@ mv ~/.axmd/config/tmp_genesis.json ~/.axmd/config/genesis.json -f
 $axmd_BIN config set app api.enable true
 $axmd_BIN config set app api.swagger true
 
+# CosmWasm configuration
+echo "Config CosmWasm"
+$axmd_BIN config set client wasm.enable_code_upload true
+$axmd_BIN config set client wasm.instantiate_default_permission "Everybody"
+
 sed -i 's/127.0.0.1/0.0.0.0/' ~/.axmd/config/config.toml
 sed -i 's/localhost/0.0.0.0/' ~/.axmd/config/app.toml

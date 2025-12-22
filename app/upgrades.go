@@ -13,11 +13,14 @@ import (
 
 	referraltypes "github.com/axiome-pro/axm-node/x/referral/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	// CosmWasm params
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 )
 
 const UpgradeNameV102 = "v1.0.2"
 const UpgradeNameV103 = "v1.0.3"
 const UpgradeNameV104 = "v1.0.4"
+const UpgradeNamev200 = "v2.0.0"
 
 func (app *AxmApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
@@ -38,6 +41,23 @@ func (app *AxmApp) RegisterUpgradeHandlers() {
 			if err != nil {
 				return nil, err
 			}
+			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
+		},
+	)
+
+	// CosmWasm upgrade handler
+	app.UpgradeKeeper.SetUpgradeHandler(
+		UpgradeNamev200,
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			// Инициализация начальных параметров модулей, добавляемых в v2.0.0
+			// 1) CosmWasm: выставляем параметры по умолчанию (как в генезисе)
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			app.WasmKeeper.SetParams(sdkCtx, wasmtypes.DefaultParams())
+
+			// 2) Authz: модуль не имеет параметров — генезис по умолчанию пустой, действий не требуется
+			// 3) Feegrant: модуль не имеет параметров — генезис по умолчанию пустой, действий не требуется
+
+			// Выполнить миграции состояния модулей
 			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
 		},
 	)

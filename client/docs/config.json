@@ -30,6 +30,14 @@
           "Params": "ReferralParams"
         }
       }
+    },
+    {
+      "url": "./third_party/openapi/cosmwasm/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "WasmParams"
+        }
+      }
     }
   ]
 }

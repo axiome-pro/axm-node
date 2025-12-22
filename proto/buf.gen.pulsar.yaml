@@ -8,14 +8,15 @@ managed:
       - buf.build/cosmos/gogo-proto
       - buf.build/cosmos/cosmos-proto
       - buf.build/cosmos/cosmos-sdk
+      - buf.build/cosmwasm/wasmd
     override:
 plugins:
   - name: go-pulsar
     out: ..
-    opt: paths=source_relative,Mcosmos/app/v1alpha1/module.proto=cosmossdk.io/api/cosmos/app/v1alpha1,Mcosmos/base/v1beta1/coin.proto=cosmossdk.io/api/cosmos/base/v1beta1,Mcosmos/base/query/v1beta1/pagination.proto=cosmossdk.io/api/cosmos/base/query/v1beta1
+    opt: paths=source_relative,Mcosmos/app/v1alpha1/module.proto=cosmossdk.io/api/cosmos/app/v1alpha1,Mcosmos/base/v1beta1/coin.proto=cosmossdk.io/api/cosmos/base/v1beta1,Mcosmos/base/query/v1beta1/pagination.proto=cosmossdk.io/api/cosmos/base/query/v1beta1,Mgithub.com/CosmWasm/wasmd/x/wasm/types/module.proto=github.com/CosmWasm/wasmd/x/wasm/types
   - name: go-grpc
     out: ..
-    opt: paths=source_relative,Mcosmos/app/v1alpha1/module.proto=cosmossdk.io/api/cosmos/app/v1alpha1
+    opt: paths=source_relative,Mcosmos/app/v1alpha1/module.proto=cosmossdk.io/api/cosmos/app/v1alpha1,Mgithub.com/CosmWasm/wasmd/x/wasm/types/module.proto=github.com/CosmWasm/wasmd/x/wasm/types
   - name: go-cosmos-orm
     out: ..
-    opt: paths=source_relative,Mcosmos/app/v1alpha1/module.proto=cosmossdk.io/api/cosmos/app/v1alpha1
+    opt: paths=source_relative,Mcosmos/app/v1alpha1/module.proto=cosmossdk.io/api/cosmos/app/v1alpha1,Mgithub.com/CosmWasm/wasmd/x/wasm/types/module.proto=github.com/CosmWasm/wasmd/x/wasm/types
