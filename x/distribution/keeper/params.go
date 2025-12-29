@@ -29,20 +29,22 @@ func (k Keeper) GetWithdrawAddrEnabled(ctx context.Context) (enabled bool, err e
 
 // GetBurnRate returns the current burn rate on fee distribution
 func (k Keeper) GetBurnRate(ctx context.Context) (dec math.LegacyDec, err error) {
-	params, err := k.Params.Get(ctx)
-	if err != nil {
-		return math.LegacyZeroDec(), err
-	}
-
-	return params.BurnRate, nil
+	return math.LegacyNewDecWithPrec(3, 1), nil
+	//params, err := k.Params.Get(ctx)
+	//if err != nil {
+	//	return math.LegacyZeroDec(), err
+	//}
+	//
+	//return params.BurnRate, nil
 }
 
 // GetValidatorCommissionRate returns the current validator commission rate
 func (k Keeper) GetValidatorCommissionRate(ctx context.Context) (dec math.LegacyDec, err error) {
-	params, err := k.Params.Get(ctx)
-	if err != nil {
-		return math.LegacyZeroDec(), err
-	}
-
-	return params.ValidatorCommissionRate, nil
+	return math.LegacyNewDecWithPrec(3, 1), nil
+	//params, err := k.Params.Get(ctx)
+	//if err != nil {
+	//	return math.LegacyZeroDec(), err
+	//}
+	//
+	//return params.ValidatorCommissionRate, nil
 }
