@@ -8371,6 +8371,11 @@ paths:
                   status_downgrade_period:
                     type: integer
                     format: int32
+                  uret_mode:
+                    type: boolean
+                    title: >-
+                      uret_mode enables referral payouts in uret token instead
+                      of uaxm
                 title: >-
                   Params - used for initializing default parameter for
                   x/referral at genesis
@@ -16631,6 +16636,9 @@ definitions:
       status_downgrade_period:
         type: integer
         format: int32
+      uret_mode:
+        type: boolean
+        title: uret_mode enables referral payouts in uret token instead of uaxm
     title: Params - used for initializing default parameter for x/referral at genesis
   axiome.referral.v1beta1.ParamsResponse:
     type: object
@@ -16648,6 +16656,9 @@ definitions:
           status_downgrade_period:
             type: integer
             format: int32
+          uret_mode:
+            type: boolean
+            title: uret_mode enables referral payouts in uret token instead of uaxm
         title: >-
           Params - used for initializing default parameter for x/referral at
           genesis

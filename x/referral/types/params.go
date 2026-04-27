@@ -42,6 +42,7 @@ func (p Params) Validate() error {
 	if err := validateNetworkAward(p.DelegatingAward); err != nil {
 		return nil
 	}
+	// no validation needed for boolean UretMode
 	return nil
 }
 
@@ -50,6 +51,7 @@ func DefaultParams() Params {
 	return Params{
 		DelegatingAward:       DefaultDelegatingAward,
 		StatusDowngradePeriod: DefaultStatusDowngradePeriod,
+		UretMode:              false,
 	}
 }
 

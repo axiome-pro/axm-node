@@ -17,6 +17,7 @@ var (
 	md_Params                         protoreflect.MessageDescriptor
 	fd_Params_delegating_award        protoreflect.FieldDescriptor
 	fd_Params_status_downgrade_period protoreflect.FieldDescriptor
+	fd_Params_uret_mode               protoreflect.FieldDescriptor
 )
 
 func init() {
@@ -24,6 +25,7 @@ func init() {
 	md_Params = File_axiome_referral_v1beta1_params_proto.Messages().ByName("Params")
 	fd_Params_delegating_award = md_Params.Fields().ByName("delegating_award")
 	fd_Params_status_downgrade_period = md_Params.Fields().ByName("status_downgrade_period")
+	fd_Params_uret_mode = md_Params.Fields().ByName("uret_mode")
 }
 
 var _ protoreflect.Message = (*fastReflection_Params)(nil)
@@ -103,6 +105,12 @@ func (x *fastReflection_Params) Range(f func(protoreflect.FieldDescriptor, proto
 			return
 		}
 	}
+	if x.UretMode != false {
+		value := protoreflect.ValueOfBool(x.UretMode)
+		if !f(fd_Params_uret_mode, value) {
+			return
+		}
+	}
 }
 
 // Has reports whether a field is populated.
@@ -122,6 +130,8 @@ func (x *fastReflection_Params) Has(fd protoreflect.FieldDescriptor) bool {
 		return x.DelegatingAward != nil
 	case "axiome.referral.v1beta1.Params.status_downgrade_period":
 		return x.StatusDowngradePeriod != int32(0)
+	case "axiome.referral.v1beta1.Params.uret_mode":
+		return x.UretMode != false
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: axiome.referral.v1beta1.Params"))
@@ -142,6 +152,8 @@ func (x *fastReflection_Params) Clear(fd protoreflect.FieldDescriptor) {
 		x.DelegatingAward = nil
 	case "axiome.referral.v1beta1.Params.status_downgrade_period":
 		x.StatusDowngradePeriod = int32(0)
+	case "axiome.referral.v1beta1.Params.uret_mode":
+		x.UretMode = false
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: axiome.referral.v1beta1.Params"))
@@ -164,6 +176,9 @@ func (x *fastReflection_Params) Get(descriptor protoreflect.FieldDescriptor) pro
 	case "axiome.referral.v1beta1.Params.status_downgrade_period":
 		value := x.StatusDowngradePeriod
 		return protoreflect.ValueOfInt32(value)
+	case "axiome.referral.v1beta1.Params.uret_mode":
+		value := x.UretMode
+		return protoreflect.ValueOfBool(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: axiome.referral.v1beta1.Params"))
@@ -188,6 +203,8 @@ func (x *fastReflection_Params) Set(fd protoreflect.FieldDescriptor, value proto
 		x.DelegatingAward = value.Message().Interface().(*NetworkAward)
 	case "axiome.referral.v1beta1.Params.status_downgrade_period":
 		x.StatusDowngradePeriod = int32(value.Int())
+	case "axiome.referral.v1beta1.Params.uret_mode":
+		x.UretMode = value.Bool()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: axiome.referral.v1beta1.Params"))
@@ -215,6 +232,8 @@ func (x *fastReflection_Params) Mutable(fd protoreflect.FieldDescriptor) protore
 		return protoreflect.ValueOfMessage(x.DelegatingAward.ProtoReflect())
 	case "axiome.referral.v1beta1.Params.status_downgrade_period":
 		panic(fmt.Errorf("field status_downgrade_period of message axiome.referral.v1beta1.Params is not mutable"))
+	case "axiome.referral.v1beta1.Params.uret_mode":
+		panic(fmt.Errorf("field uret_mode of message axiome.referral.v1beta1.Params is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: axiome.referral.v1beta1.Params"))
@@ -233,6 +252,8 @@ func (x *fastReflection_Params) NewField(fd protoreflect.FieldDescriptor) protor
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "axiome.referral.v1beta1.Params.status_downgrade_period":
 		return protoreflect.ValueOfInt32(int32(0))
+	case "axiome.referral.v1beta1.Params.uret_mode":
+		return protoreflect.ValueOfBool(false)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: axiome.referral.v1beta1.Params"))
@@ -309,6 +330,9 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 		if x.StatusDowngradePeriod != 0 {
 			n += 1 + runtime.Sov(uint64(x.StatusDowngradePeriod))
 		}
+		if x.UretMode {
+			n += 2
+		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
 		}
@@ -337,6 +361,16 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 		if x.unknownFields != nil {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
+		}
+		if x.UretMode {
+			i--
+			if x.UretMode {
+				dAtA[i] = 1
+			} else {
+				dAtA[i] = 0
+			}
+			i--
+			dAtA[i] = 0x18
 		}
 		if x.StatusDowngradePeriod != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.StatusDowngradePeriod))
@@ -461,6 +495,26 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 						break
 					}
 				}
+			case 3:
+				if wireType != 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field UretMode", wireType)
+				}
+				var v int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				x.UretMode = bool(v != 0)
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -997,6 +1051,8 @@ type Params struct {
 
 	DelegatingAward       *NetworkAward `protobuf:"bytes,1,opt,name=delegating_award,json=delegatingAward,proto3" json:"delegating_award,omitempty"`
 	StatusDowngradePeriod int32         `protobuf:"varint,2,opt,name=status_downgrade_period,json=statusDowngradePeriod,proto3" json:"status_downgrade_period,omitempty"`
+	// uret_mode enables referral payouts in uret token instead of uaxm
+	UretMode bool `protobuf:"varint,3,opt,name=uret_mode,json=uretMode,proto3" json:"uret_mode,omitempty"`
 }
 
 func (x *Params) Reset() {
@@ -1031,6 +1087,13 @@ func (x *Params) GetStatusDowngradePeriod() int32 {
 		return x.StatusDowngradePeriod
 	}
 	return 0
+}
+
+func (x *Params) GetUretMode() bool {
+	if x != nil {
+		return x.UretMode
+	}
+	return false
 }
 
 type NetworkAward struct {
@@ -1076,7 +1139,7 @@ var file_axiome_referral_v1beta1_params_proto_rawDesc = []byte{
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x17, 0x61, 0x78, 0x69, 0x6f, 0x6d, 0x65, 0x2e, 0x72,
 	0x65, 0x66, 0x65, 0x72, 0x72, 0x61, 0x6c, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x1a,
 	0x14, 0x67, 0x6f, 0x67, 0x6f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x67, 0x6f, 0x67, 0x6f, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xce, 0x01, 0x0a, 0x06, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x8e, 0x02, 0x0a, 0x06, 0x50, 0x61, 0x72, 0x61, 0x6d, 0x73,
 	0x12, 0x85, 0x01, 0x0a, 0x10, 0x64, 0x65, 0x6c, 0x65, 0x67, 0x61, 0x74, 0x69, 0x6e, 0x67, 0x5f,
 	0x61, 0x77, 0x61, 0x72, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x61, 0x78,
 	0x69, 0x6f, 0x6d, 0x65, 0x2e, 0x72, 0x65, 0x66, 0x65, 0x72, 0x72, 0x61, 0x6c, 0x2e, 0x76, 0x31,
@@ -1089,6 +1152,10 @@ var file_axiome_referral_v1beta1_params_proto_rawDesc = []byte{
 	0x75, 0x73, 0x5f, 0x64, 0x6f, 0x77, 0x6e, 0x67, 0x72, 0x61, 0x64, 0x65, 0x5f, 0x70, 0x65, 0x72,
 	0x69, 0x6f, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x15, 0x73, 0x74, 0x61, 0x74, 0x75,
 	0x73, 0x44, 0x6f, 0x77, 0x6e, 0x67, 0x72, 0x61, 0x64, 0x65, 0x50, 0x65, 0x72, 0x69, 0x6f, 0x64,
+	0x12, 0x3e, 0x0a, 0x09, 0x75, 0x72, 0x65, 0x74, 0x5f, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x08, 0x42, 0x21, 0xea, 0xde, 0x1f, 0x09, 0x75, 0x72, 0x65, 0x74, 0x5f, 0x6d, 0x6f,
+	0x64, 0x65, 0xf2, 0xde, 0x1f, 0x10, 0x79, 0x61, 0x6d, 0x6c, 0x3a, 0x22, 0x75, 0x72, 0x65, 0x74,
+	0x5f, 0x6d, 0x6f, 0x64, 0x65, 0x22, 0x52, 0x08, 0x75, 0x72, 0x65, 0x74, 0x4d, 0x6f, 0x64, 0x65,
 	0x3a, 0x04, 0x98, 0xa0, 0x1f, 0x00, 0x22, 0x80, 0x01, 0x0a, 0x0c, 0x4e, 0x65, 0x74, 0x77, 0x6f,
 	0x72, 0x6b, 0x41, 0x77, 0x61, 0x72, 0x64, 0x12, 0x6a, 0x0a, 0x07, 0x6e, 0x65, 0x74, 0x77, 0x6f,
 	0x72, 0x6b, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x42, 0x50, 0xda, 0xde, 0x1f, 0x2a, 0x62, 0x69,

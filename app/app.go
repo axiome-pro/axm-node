@@ -14,15 +14,13 @@ import (
 	_ "github.com/axiome-pro/axm-node/x/wasm"
 	dbm "github.com/cosmos/cosmos-db"
 
+	distrkeeper "github.com/axiome-pro/axm-node/x/distribution/keeper"
+	"github.com/axiome-pro/axm-node/x/genutil"
+	genutiltypes "github.com/axiome-pro/axm-node/x/genutil/types"
 	"cosmossdk.io/core/appconfig"
 	"cosmossdk.io/depinject"
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
-	upgradetypes "cosmossdk.io/x/upgrade/types"
-
-	distrkeeper "github.com/axiome-pro/axm-node/x/distribution/keeper"
-	"github.com/axiome-pro/axm-node/x/genutil"
-	genutiltypes "github.com/axiome-pro/axm-node/x/genutil/types"
 
 	slashigkeeper "github.com/axiome-pro/axm-node/x/slashing/keeper"
 	stakingkeeper "github.com/axiome-pro/axm-node/x/staking/keeper"
@@ -45,20 +43,17 @@ import (
 	_ "github.com/axiome-pro/axm-node/x/slashing"     // import for side-effects
 	_ "github.com/axiome-pro/axm-node/x/staking"      // import for side-effects
 	_ "cosmossdk.io/api/cosmos/tx/config/v1"        // import for side-effects
-	feegrantmodule "cosmossdk.io/x/feegrant"
 	_ "cosmossdk.io/x/upgrade"
 	// CosmWasm imports
 	_ "cosmossdk.io/x/feegrant/module" // import for side-effects
 	"github.com/CosmWasm/wasmd/x/wasm"
-	_ "github.com/CosmWasm/wasmd/x/wasm" // import for side-effects
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	_ "github.com/CosmWasm/wasmd/x/wasm"              // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/auth"           // import for side-effects
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
-	authz "github.com/cosmos/cosmos-sdk/x/authz"
-	_ "github.com/cosmos/cosmos-sdk/x/authz/module" // import for side-effects
-	_ "github.com/cosmos/cosmos-sdk/x/bank"         // import for side-effects
-	_ "github.com/cosmos/cosmos-sdk/x/consensus"    // import for side-effects
-	_ "github.com/cosmos/cosmos-sdk/x/mint"         // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/authz/module"   // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/bank"           // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/consensus"      // import for side-effects
+	_ "github.com/cosmos/cosmos-sdk/x/mint"           // import for side-effects
 )
 
 // DefaultNodeHome default home directories for the application daemon
@@ -174,23 +169,6 @@ func NewAxmApp(
 	/****  Module Options ****/
 
 	app.RegisterUpgradeHandlers()
-
-	// Configure store loader for in-place store upgrades (adding new KV stores)
-	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
-	if err != nil {
-		return nil, err
-	}
-	if upgradeInfo.Name == UpgradeNamev200 && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		// We are adding new stores in v2.0.0: wasm, authz, feegrant
-		storeUpgrades := storetypes.StoreUpgrades{
-			Added: []string{
-				wasmtypes.StoreKey,
-				authz.ModuleName,
-				feegrantmodule.ModuleName,
-			},
-		}
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storeUpgrades))
-	}
 
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	// NOTE: this is not required apps that don't use the simulator for fuzz testing transactions

@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	CoinUnit = "uaxm"
+	CoinUnit         = "uaxm"
+	ReferralCoinUnit = "uret"
 
 	DefaultBondDenom = CoinUnit
 

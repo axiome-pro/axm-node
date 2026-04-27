@@ -39,7 +39,7 @@ init:
 ###  Building  ###
 ##################
 build-all: proto
-		"$(DOCKER)" run --rm -v "$(CURDIR):/axm-node" -w /axm-node golang:1.21-alpine sh ./scripts/build-all.sh
+		"$(DOCKER)" run --rm -v "$(CURDIR):/axm-node" -w /axm-node golang:1.25 sh ./scripts/build-all.sh
 
 build: go.sum
 		go build $(BUILD_FLAGS) ./cmd/axmd

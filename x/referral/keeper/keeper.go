@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	"cosmossdk.io/collections"
 	"fmt"
+
+	"cosmossdk.io/collections"
 	"github.com/pkg/errors"
 
 	"cosmossdk.io/log"
@@ -390,6 +391,62 @@ func (k Keeper) PayUpFees(ctx sdk.Context, acc string, totalAmount math.Int) (re
 		return totalAmount, err
 	}
 
+	// If uret_mode is enabled, skip burning and uaxm distribution.
+	// Mint uret equal to the fee-share and send to beneficiaries. Remain is unchanged.
+	if k.GetParams(ctx).UretMode {
+		cdc := k.accountKeeper.AddressCodec()
+
+		type payout struct {
+			to  sdk.AccAddress
+			amt math.Int
+		}
+		payouts := make([]payout, 0, len(fees))
+		totalFee := int64(0)
+
+		for _, fee := range fees {
+			x := fee.Ratio.MulInt64(totalAmount.Int64()).Int64()
+			if x == 0 {
+				continue
+			}
+			totalFee += x
+			beneficiary := fee.GetBeneficiary()
+			payouts = append(payouts, payout{to: beneficiary, amt: math.NewInt(x)})
+
+			to, err := cdc.BytesToString(beneficiary)
+			if err != nil {
+				return totalAmount, err
+			}
+
+			amount := sdk.NewCoins(sdk.NewCoin(util.ConfigReferralDenom, math.NewInt(x)))
+			ctx.EventManager().EmitEvent(
+				sdk.NewEvent(
+					types.EventTypeRefFee,
+					sdk.NewAttribute(sdk.AttributeKeyAmount, amount.String()),
+					sdk.NewAttribute(types.AttributeKeyFrom, acc),
+					sdk.NewAttribute(types.AttributeKeyTo, to),
+				),
+			)
+		}
+
+		if totalFee != 0 {
+			// mint total uret to module and send to each beneficiary
+			mint := sdk.NewCoins(sdk.NewCoin(util.ConfigReferralDenom, math.NewInt(totalFee)))
+			if err := k.bankKeeper.MintCoins(ctx, k.referralAccountName, mint); err != nil {
+				return totalAmount, err
+			}
+			for _, p := range payouts {
+				coins := sdk.NewCoins(sdk.NewCoin(util.ConfigReferralDenom, p.amt))
+				if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, k.referralAccountName, p.to, coins); err != nil {
+					return totalAmount, err
+				}
+			}
+		}
+
+		// nothing is deducted from delegator's uaxm in uret-mode
+		return totalAmount, nil
+	}
+
+	// legacy behavior (non-uret mode): burn and distribute in bond denom
 	cdc := k.accountKeeper.AddressCodec()
 	accAddr, err := cdc.StringToBytes(acc)
 	if err != nil {

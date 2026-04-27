@@ -28,7 +28,7 @@ modules:
         - account: not_bonded_tokens_pool
           permissions: [ burner, staking ]
         - account: referral
-          permissions: [ burner ]
+          permissions: [ minter, burner ]
         - account: vote
       authority: vote
   - name: bank

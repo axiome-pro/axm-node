@@ -1,5 +1,6 @@
 package util
 
 const (
-	ConfigMainDenom = "uaxm"
+	ConfigMainDenom     = "uaxm"
+	ConfigReferralDenom = "uret"
 )

@@ -10,6 +10,7 @@ import (
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	referraltypes "github.com/axiome-pro/axm-node/x/referral/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -21,6 +22,7 @@ const UpgradeNameV102 = "v1.0.2"
 const UpgradeNameV103 = "v1.0.3"
 const UpgradeNameV104 = "v1.0.4"
 const UpgradeNamev200 = "v2.0.0"
+const UpgradeNameV210 = "v2.1.0"
 
 func (app *AxmApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
@@ -65,6 +67,29 @@ func (app *AxmApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
 		UpgradeNameV104,
 		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
+		},
+	)
+
+	// v2.1.0: enable new referral minter capability is handled by app wiring.
+	// This handler explicitly initializes referral params.UretMode to false.
+	app.UpgradeKeeper.SetUpgradeHandler(
+		UpgradeNameV210,
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+			// Update referral module account permissions: add minter, burner
+			macc := app.AccountKeeper.GetModuleAccount(sdkCtx, referraltypes.ReferralAccountName)
+			if macc != nil {
+				baseAcc := macc.(*authtypes.ModuleAccount)
+				baseAcc.Permissions = []string{authtypes.Minter, authtypes.Burner}
+				app.AccountKeeper.SetModuleAccount(sdkCtx, baseAcc)
+			}
+
+			// set referral params: UretMode = false (explicit initialization)
+			params := app.ReferralKeeper.GetParams(sdkCtx)
+			params.UretMode = false
+
 			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
 		},
 	)
