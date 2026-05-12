@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	"github.com/pkg/errors"
 
 	"github.com/axiome-pro/axm-node/x/referral/types"
@@ -25,25 +26,25 @@ var statusRequirements = map[types.Status]func(value types.Info) (types.StatusCh
 		return types.StatusCheckResult{Overall: true}, nil
 	},
 	types.STATUS_STARTER: func(value types.Info) (types.StatusCheckResult, error) {
-		return statusRequirementsSelfStake(value, 100)
+		return statusRequirementsSelfStake(value, 1_000)
 	},
 	types.STATUS_LEADER: func(value types.Info) (types.StatusCheckResult, error) {
-		return statusRequirementsXByX(value, 250, 20_000, StatusLeaderMinXCriteria, 0)
+		return statusRequirementsXByX(value, 10_000, 20_000, StatusLeaderMinXCriteria, 0)
 	},
 	types.STATUS_GURU: func(value types.Info) (types.StatusCheckResult, error) {
-		return statusRequirementsXByX(value, 600, 50_000, StatusGuruMinXCriteria, StatusGuruMinXParameter)
+		return statusRequirementsXByX(value, 25_000, 50_000, StatusGuruMinXCriteria, StatusGuruMinXParameter)
 	},
 	types.STATUS_BOSS: func(value types.Info) (types.StatusCheckResult, error) {
-		return statusRequirementsCore(value, 1500, 150_000, 15)
+		return statusRequirementsCore(value, 60_000, 150_000, 15)
 	},
 	types.STATUS_PRO: func(value types.Info) (types.StatusCheckResult, error) {
-		return statusRequirementsCore(value, 4_000, 300_000, 50)
+		return statusRequirementsCore(value, 130_000, 300_000, 50)
 	},
 	types.STATUS_TOP: func(value types.Info) (types.StatusCheckResult, error) {
-		return statusRequirementsCore(value, 10_000, 800_000, 100)
+		return statusRequirementsCore(value, 200_000, 800_000, 100)
 	},
 	types.STATUS_MEGA: func(value types.Info) (types.StatusCheckResult, error) {
-		return statusRequirementsCore(value, 30_000, 2_000_000, 300)
+		return statusRequirementsCore(value, 350_000, 2_000_000, 300)
 	},
 }
 

@@ -19,7 +19,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=axmd \
 	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT)
 
-BUILD_FLAGS := -ldflags '$(ldflags)'
+BUILD_FLAGS := -trimpath -ldflags '$(ldflags)'
 
 ###########
 # Install #
@@ -40,6 +40,9 @@ init:
 ##################
 build-all: proto
 		"$(DOCKER)" run --rm -v "$(CURDIR):/axm-node" -w /axm-node golang:1.25 sh ./scripts/build-all.sh
+
+build-all-ff: proto
+		"$(DOCKER)" run --rm -v "$(CURDIR):/axm-node" -w /axm-node golang:1.21-bullseye sh ./scripts/build-all.sh
 
 build: go.sum
 		go build $(BUILD_FLAGS) ./cmd/axmd

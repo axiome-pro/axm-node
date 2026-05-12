@@ -23,6 +23,7 @@ const UpgradeNameV103 = "v1.0.3"
 const UpgradeNameV104 = "v1.0.4"
 const UpgradeNamev200 = "v2.0.0"
 const UpgradeNameV210 = "v2.1.0"
+const UpgradeNameV220 = "v2.2.0"
 
 func (app *AxmApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
@@ -90,6 +91,18 @@ func (app *AxmApp) RegisterUpgradeHandlers() {
 			params := app.ReferralKeeper.GetParams(sdkCtx)
 			params.UretMode = false
 
+			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
+		},
+	)
+
+	app.UpgradeKeeper.SetUpgradeHandler(
+		UpgradeNameV220,
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			err := app.ReferralKeeper.UpgradeRecalculateStatuses(sdkCtx)
+			if err != nil {
+				return nil, err
+			}
 			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
 		},
 	)
