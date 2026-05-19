@@ -23,6 +23,11 @@ type AccountKeeper interface {
 	GetAccount(ctx context.Context, addr sdk.AccAddress) sdk.AccountI
 }
 
+// WasmKeeper defines the minimal read-only wasm keeper API needed by referral hooks.
+type WasmKeeper interface {
+	HasContractInfo(ctx context.Context, contractAddress sdk.AccAddress) bool
+}
+
 // BankKeeper defines the expected interface needed to retrieve account balances.
 type BankKeeper interface {
 	SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error

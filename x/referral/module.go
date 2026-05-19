@@ -21,11 +21,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
+	"cosmossdk.io/core/address"
+	"cosmossdk.io/core/appmodule"
 	"github.com/axiome-pro/axm-node/x/referral/client/cli"
 	"github.com/axiome-pro/axm-node/x/referral/keeper"
 	"github.com/axiome-pro/axm-node/x/referral/types"
-	"cosmossdk.io/core/address"
-	"cosmossdk.io/core/appmodule"
 )
 
 // ConsensusVersion defines the current x/referral module consensus version.
@@ -178,6 +178,7 @@ type ModuleInputs struct {
 	Cdc          codec.Codec
 
 	AccountKeeper types.AccountKeeper
+	WasmKeeper    types.WasmKeeper `optional:"true"`
 	BankKeeper    types.BankKeeper
 	StakingKeeper types.StakingKeeper
 }
@@ -206,6 +207,7 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.Cdc,
 		in.StoreService,
 		in.AccountKeeper,
+		in.WasmKeeper,
 		in.BankKeeper,
 		in.StakingKeeper,
 		authority,

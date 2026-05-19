@@ -6,13 +6,13 @@ import (
 	stakingKeeper "github.com/axiome-pro/axm-node/x/staking/keeper"
 
 	//distributionkeeper "github.com/axiome-pro/axm-node/x/distribution/keeper"
-	exportedtypes "github.com/axiome-pro/axm-node/x/wasm/types"
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
 	"cosmossdk.io/depinject"
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	"github.com/CosmWasm/wasmd/x/wasm/types"
+	exportedtypes "github.com/axiome-pro/axm-node/x/wasm/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -81,8 +81,6 @@ func ProvideWasmKeeper(in ModuleInputs) ModuleOutputs {
 			homeDir, _ = v.(string)
 		}
 
-		// Pass nil for StakingKeeper since we can't create a proper WrappedStakingKeeper instance
-		// The type mismatch between our StakingKeeper and the one expected by wasmd prevents us from using it directly
 		k := wasmkeeper.NewKeeper(
 			in.Cdc,
 			in.StoreService,
@@ -101,6 +99,7 @@ func ProvideWasmKeeper(in ModuleInputs) ModuleOutputs {
 			types.DefaultWasmConfig(),
 			"iterator,staking,distribution,cosmwasm_1_1,cosmwasm_1_2,cosmwasm_1_3,cosmwasm_1_4",
 			authority,
+			wasmkeeper.WithMessageEncoders(axmMessageEncoders()),
 		)
 
 		return ModuleOutputs{
