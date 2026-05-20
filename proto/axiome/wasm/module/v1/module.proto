@@ -3,11 +3,11 @@ package axiome.wasm.module.v1;
 
 import "cosmos/app/v1alpha1/module.proto";
 
-option go_package = "github.com/CosmWasm/wasmd/x/wasm/types;types";
+option go_package = "github.com/axiome-pro/axm-node/api/axiome/wasm/module/v1;modulev1";
 
 message Module {
   option (cosmos.app.v1alpha1.module) = {
-    go_import : "github.com/CosmWasm/wasmd/x/wasm/types"
+    go_import : "github.com/axiome-pro/axm-node/x/wasm"
   };
   // authority defines the custom module authority. If not set, defaults to the
   // governance module.

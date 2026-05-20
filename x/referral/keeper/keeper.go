@@ -9,9 +9,9 @@ import (
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
 
+	storetypes "cosmossdk.io/core/store"
 	"github.com/axiome-pro/axm-node/util"
 	"github.com/axiome-pro/axm-node/x/referral/types"
-	storetypes "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -22,6 +22,7 @@ type Keeper struct {
 	cdc                 codec.BinaryCodec
 	storeService        storetypes.KVStoreService
 	accountKeeper       types.AccountKeeper
+	wasmKeeper          types.WasmKeeper
 	bankKeeper          types.BankKeeper
 	stakingKeeper       types.StakingKeeper
 	Params              collections.Item[types.Params]
@@ -35,6 +36,7 @@ func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeService storetypes.KVStoreService,
 	accountKeeper types.AccountKeeper,
+	wasmKeeper types.WasmKeeper,
 	bankKeeper types.BankKeeper,
 	stakingKeeper types.StakingKeeper,
 	authority sdk.AccAddress, referralAccountName string,
@@ -45,6 +47,7 @@ func NewKeeper(
 		cdc:                 cdc,
 		storeService:        storeService,
 		accountKeeper:       accountKeeper,
+		wasmKeeper:          wasmKeeper,
 		bankKeeper:          bankKeeper,
 		stakingKeeper:       stakingKeeper,
 		Params:              collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
@@ -53,6 +56,23 @@ func NewKeeper(
 		referralAccountName: referralAccountName,
 	}
 	return &keeper
+}
+
+func (k Keeper) isWasmContract(ctx sdk.Context, acc string) bool {
+	if k.wasmKeeper == nil {
+		return false
+	}
+
+	addr, err := k.accountKeeper.AddressCodec().StringToBytes(acc)
+	if err != nil {
+		return false
+	}
+
+	return k.wasmKeeper.HasContractInfo(ctx, addr)
+}
+
+func (k Keeper) hasDelegationReferralAccess(ctx sdk.Context, acc string) bool {
+	return k.exists(ctx, acc) || k.isWasmContract(ctx, acc)
 }
 
 // Logger returns a module-specific logger.

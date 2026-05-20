@@ -1,10 +1,10 @@
 package keeper
 
 import (
-	"github.com/axiome-pro/axm-node/x/referral/types"
 	"context"
 	sdkerrors "cosmossdk.io/errors"
 	"cosmossdk.io/math"
+	"github.com/axiome-pro/axm-node/x/referral/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	stakingtypes "github.com/axiome-pro/axm-node/x/staking/types"
@@ -33,11 +33,13 @@ func (h Hooks) DelegationCoinsModified(ctx context.Context, delAddr, valAddr str
 }
 
 func (h Hooks) CheckDelegationAvailable(ctx context.Context, delAddr, valAddr string) error {
-	if !h.k.exists(sdk.UnwrapSDKContext(ctx), delAddr) {
-		return sdkerrors.Wrap(types.ErrNotFound, delAddr)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if h.k.hasDelegationReferralAccess(sdkCtx, delAddr) {
+		return nil
 	}
 
-	return nil
+	return sdkerrors.Wrap(types.ErrNotFound, delAddr)
 }
 
 func (h Hooks) SpendCoinsForRef(ctx context.Context, addr string, totalAmount math.Int) (math.Int, error) {
