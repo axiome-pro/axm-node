@@ -119,7 +119,7 @@ func (k Keeper) OnBalanceChanged(ctx sdk.Context, acc string, dd math.Int) error
 		newDelegated := value.SelfDelegated.Add(dd)
 
 		// TODO: move active account threshold to params
-		if newDelegated.Int64() >= 100_000_000 {
+		if newDelegated.Int64() >= 1_000_000_000 {
 			if !value.Active {
 				changeActivity = true
 				active = true
