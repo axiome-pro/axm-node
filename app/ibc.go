@@ -2,6 +2,7 @@ package app
 
 import (
 	storetypes "cosmossdk.io/store/types"
+	"github.com/spf13/cobra"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -16,6 +17,8 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
+	solomachine "github.com/cosmos/ibc-go/v8/modules/light-clients/06-solomachine"
+	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 )
 
 // ibcStoreKeys are the store keys added by IBC. They are listed here so that the
@@ -78,6 +81,15 @@ func (app *AxmApp) setupIBC(appCodec codec.Codec, authority string) error {
 		authority,
 	)
 
+	// Light client implementations are separate modules. The IBC core module
+	// does not pull them in, so without this the chain accepts no client at all:
+	// MsgCreateClient fails to decode with "unable to resolve type URL
+	// /ibc.lightclients.tendermint.v1.ClientState".
+	for _, lc := range ibcLightClientBasics() {
+		lc.RegisterInterfaces(app.interfaceRegistry)
+		lc.RegisterLegacyAminoCodec(app.legacyAmino)
+	}
+
 	transferModule := ibctransfer.NewIBCModule(app.TransferKeeper)
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
@@ -121,9 +133,37 @@ func ibcModuleAccountPermissions() map[string][]string {
 // produces a genesis with no IBC, capability or transfer state, and the client
 // cannot decode IBC messages.
 func IBCModuleBasics() []module.AppModuleBasic {
-	return []module.AppModuleBasic{
+	return append([]module.AppModuleBasic{
 		capability.AppModuleBasic{},
 		ibc.AppModuleBasic{},
 		ibctransfer.AppModuleBasic{},
+	}, ibcLightClientBasics()...)
+}
+
+// IBCTxCommands and IBCQueryCommands return the CLI commands of the manually
+// wired IBC modules. Module commands normally come from autocli, which is fed by
+// the app config and therefore does not see these modules; without this the node
+// ships IBC but offers no way to use it from the command line.
+func IBCTxCommands() []*cobra.Command {
+	return []*cobra.Command{
+		ibc.AppModuleBasic{}.GetTxCmd(),
+		ibctransfer.AppModuleBasic{}.GetTxCmd(),
+	}
+}
+
+func IBCQueryCommands() []*cobra.Command {
+	return []*cobra.Command{
+		ibc.AppModuleBasic{}.GetQueryCmd(),
+		ibctransfer.AppModuleBasic{}.GetQueryCmd(),
+	}
+}
+
+// ibcLightClientBasics returns the light client implementations the chain
+// accepts. Tendermint is what every Cosmos counterparty uses; solomachine is
+// included because it costs nothing and the client keeper allows it by default.
+func ibcLightClientBasics() []module.AppModuleBasic {
+	return []module.AppModuleBasic{
+		ibctm.AppModuleBasic{},
+		solomachine.AppModuleBasic{},
 	}
 }
