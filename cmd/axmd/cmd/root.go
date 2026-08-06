@@ -57,6 +57,15 @@ func NewRootCmd() *cobra.Command {
 		panic(err)
 	}
 
+	// IBC is wired manually in the app (ibc-go publishes no depinject configs),
+	// so its module basics are invisible to the config-driven manager above and
+	// have to be added here for genesis and client codec registration.
+	for _, b := range app.IBCModuleBasics() {
+		moduleBasicManager[b.Name()] = b
+		b.RegisterInterfaces(clientCtx.InterfaceRegistry)
+		b.RegisterLegacyAminoCodec(clientCtx.LegacyAmino)
+	}
+
 	rootCmd := &cobra.Command{
 		Use:   "axmd",
 		Short: "axmd - the minimal chain app",

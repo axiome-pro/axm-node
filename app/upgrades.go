@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 
+	storetypes "cosmossdk.io/store/types"
+
 	"github.com/axiome-pro/axm-node/x/referral"
 	"github.com/axiome-pro/axm-node/x/referral/keeper"
 	stakingkeeper "github.com/axiome-pro/axm-node/x/staking/keeper"
@@ -25,6 +27,11 @@ const UpgradeNamev200 = "v2.0.0"
 const UpgradeNameV210 = "v2.1.0"
 const UpgradeNameV220 = "v2.2.0"
 const UpgradeNameV221 = "v2.2.1"
+
+// UpgradeNameIBC is the upgrade that introduces IBC. It is the first upgrade on
+// this chain that adds store keys, so it needs a store loader in addition to a
+// handler.
+const UpgradeNameIBC = "v2.3.0-ibc"
 
 func (app *AxmApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
@@ -119,6 +126,38 @@ func (app *AxmApp) RegisterUpgradeHandlers() {
 			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
 		},
 	)
+
+	app.UpgradeKeeper.SetUpgradeHandler(
+		UpgradeNameIBC,
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			// capability, ibc and transfer are absent from fromVM, so
+			// RunMigrations calls their InitGenesis and writes default state:
+			// empty client, connection and channel sets, and transfer enabled in
+			// both directions. No migration of existing state is involved.
+			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
+		},
+	)
+
+	app.setIBCStoreLoader()
+}
+
+// setIBCStoreLoader mounts the store keys introduced by IBC when the chain
+// reaches the upgrade height. Without it the node halts at that height with a
+// missing store error, because the keys are registered in the app but have never
+// been written to disk.
+func (app *AxmApp) setIBCStoreLoader() {
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Name != UpgradeNameIBC || app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		return
+	}
+
+	app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &storetypes.StoreUpgrades{
+		Added: ibcStoreKeys,
+	}))
 }
 
 func upgradeToV102(ctx context.Context, k referral.Keeper) error {

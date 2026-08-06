@@ -11,6 +11,7 @@ import (
 	"github.com/axiome-pro/axm-node/client/docs"
 	"github.com/axiome-pro/axm-node/x/referral"
 	"github.com/axiome-pro/axm-node/x/vote"
+	votetypes "github.com/axiome-pro/axm-node/x/vote/types"
 	_ "github.com/axiome-pro/axm-node/x/wasm"
 	dbm "github.com/cosmos/cosmos-db"
 
@@ -34,7 +35,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
+
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
@@ -90,6 +96,14 @@ type AxmApp struct {
 	WasmKeeper            wasm.Keeper
 
 	AuthzKeeper authzkeeper.Keeper
+
+	// IBC keepers. These are not wired through app.yaml: ibc-go publishes no
+	// depinject module configs, so they are built by hand in setupIBC.
+	CapabilityKeeper     *capabilitykeeper.Keeper
+	IBCKeeper            *ibckeeper.Keeper
+	TransferKeeper       ibctransferkeeper.Keeper
+	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
+	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -163,6 +177,13 @@ func NewAxmApp(
 
 	// register streaming services
 	if err := app.RegisterStreamingServices(appOpts, app.kvStoreKeys()); err != nil {
+		return nil, err
+	}
+
+	// IBC has to be attached after the app is built, because RegisterStores
+	// mounts stores on the constructed baseapp, and before Load, which reads
+	// them. The authority matches every other module on this chain: x/vote.
+	if err := app.setupIBC(app.appCodec, authtypes.NewModuleAddress(votetypes.ModuleName).String()); err != nil {
 		return nil, err
 	}
 
