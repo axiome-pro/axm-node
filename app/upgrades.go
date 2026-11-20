@@ -7,7 +7,11 @@ import (
 	"github.com/axiome-pro/axm-node/x/referral/keeper"
 	stakingkeeper "github.com/axiome-pro/axm-node/x/staking/keeper"
 	stakingtypes "github.com/axiome-pro/axm-node/x/staking/types"
+	storetypes "cosmossdk.io/store/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -25,6 +29,22 @@ const UpgradeNamev200 = "v2.0.0"
 const UpgradeNameV210 = "v2.1.0"
 const UpgradeNameV220 = "v2.2.0"
 const UpgradeNameV221 = "v2.2.1"
+const UpgradeNameV230 = "v2.3.0-ibc"
+
+// setIBCStoreLoader adds the IBC stores at the height of the v2.3.0-ibc
+// upgrade. It must run before the app is loaded.
+func (app *AxmApp) setIBCStoreLoader() error {
+	info, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		return err
+	}
+	if info.Name == UpgradeNameV230 && !app.UpgradeKeeper.IsSkipHeight(info.Height) {
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(info.Height, &storetypes.StoreUpgrades{
+			Added: []string{capabilitytypes.StoreKey, ibcexported.StoreKey, ibctransfertypes.StoreKey},
+		}))
+	}
+	return nil
+}
 
 func (app *AxmApp) RegisterUpgradeHandlers() {
 	app.UpgradeKeeper.SetUpgradeHandler(
@@ -104,6 +124,17 @@ func (app *AxmApp) RegisterUpgradeHandlers() {
 			if err != nil {
 				return nil, err
 			}
+			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
+		},
+	)
+
+	// v2.3.0-ibc: adds capability, ibc and transfer. RunMigrations sees them
+	// missing from fromVM and runs their InitGenesis with default params
+	// (capability first, by the default migration order), which also binds
+	// the transfer port.
+	app.UpgradeKeeper.SetUpgradeHandler(
+		UpgradeNameV230,
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			return app.ModuleManager.RunMigrations(ctx, app.Configurator(), fromVM)
 		},
 	)

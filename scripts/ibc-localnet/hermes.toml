@@ -1,0 +1,95 @@
+[global]
+log_level = 'info'
+
+[mode.clients]
+enabled = true
+refresh = true
+misbehaviour = false
+
+[mode.connections]
+enabled = false
+
+[mode.channels]
+enabled = false
+
+[mode.packets]
+enabled = true
+clear_interval = 100
+clear_on_start = true
+tx_confirmation = true
+
+[rest]
+enabled = false
+host = '127.0.0.1'
+port = 3000
+
+[telemetry]
+enabled = false
+host = '127.0.0.1'
+port = 3001
+
+[[chains]]
+id = 'axm-a'
+type = 'CosmosSdk'
+rpc_addr = 'http://axm-a:26657'
+grpc_addr = 'http://axm-a:9090'
+event_source = { mode = 'push', url = 'ws://axm-a:26657/websocket', batch_delay = '500ms' }
+rpc_timeout = '10s'
+account_prefix = 'axm'
+key_name = 'relayer'
+store_prefix = 'ibc'
+default_gas = 300000
+max_gas = 4000000
+gas_price = { price = 0.0, denom = 'uaxm' }
+gas_multiplier = 1.3
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '30s'
+trusting_period = '14days'
+trust_threshold = { numerator = '2', denominator = '3' }
+address_type = { derivation = 'cosmos' }
+
+[[chains]]
+id = 'axm-b'
+type = 'CosmosSdk'
+rpc_addr = 'http://axm-b:26657'
+grpc_addr = 'http://axm-b:9090'
+event_source = { mode = 'push', url = 'ws://axm-b:26657/websocket', batch_delay = '500ms' }
+rpc_timeout = '10s'
+account_prefix = 'axm'
+key_name = 'relayer'
+store_prefix = 'ibc'
+default_gas = 300000
+max_gas = 4000000
+gas_price = { price = 0.0, denom = 'uaxm' }
+gas_multiplier = 1.3
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '30s'
+trusting_period = '14days'
+trust_threshold = { numerator = '2', denominator = '3' }
+address_type = { derivation = 'cosmos' }
+
+[[chains]]
+id = 'axm-u'
+type = 'CosmosSdk'
+rpc_addr = 'http://axm-u:26657'
+grpc_addr = 'http://axm-u:9090'
+event_source = { mode = 'push', url = 'ws://axm-u:26657/websocket', batch_delay = '500ms' }
+rpc_timeout = '10s'
+account_prefix = 'axm'
+key_name = 'relayer'
+store_prefix = 'ibc'
+default_gas = 300000
+max_gas = 4000000
+gas_price = { price = 0.0, denom = 'uaxm' }
+gas_multiplier = 1.3
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '30s'
+trusting_period = '14days'
+trust_threshold = { numerator = '2', denominator = '3' }
+address_type = { derivation = 'cosmos' }

@@ -7,11 +7,13 @@ modules:
       # During begin block slashing happens after distr.BeginBlocker so that
       # there is nothing left over in the validator fee pool, so as to keep the CanWithdrawInvariant invariant.
       # NOTE: staking module is required if HistoricalEntries param > 0
-      begin_blockers: [ upgrade, distribution, slashing, staking, referral, vote, wasm, authz ]
+      # capability must begin first: it rebuilds its memory store after a restart.
+      begin_blockers: [ capability, upgrade, distribution, slashing, staking, ibc, referral, vote, wasm, authz ]
       end_blockers: [ staking, wasm, feegrant ]
       # NOTE: The genutils module must occur after staking so that pools are properly initialized with tokens from genesis accounts.
       # NOTE: The genutils module must also occur after auth so that it can access the params from auth.
-      init_genesis: [ auth, authz, bank, feegrant, distribution, referral, staking, slashing, vote, genutil, upgrade, wasm ]
+      # NOTE: capability must be initialized before ibc and transfer (port binding claims capabilities).
+      init_genesis: [ capability, auth, authz, bank, feegrant, distribution, referral, staking, slashing, vote, genutil, upgrade, ibc, transfer, wasm ]
       override_store_keys:
         - module_name: auth
           kv_store_key: acc
@@ -30,6 +32,8 @@ modules:
         - account: referral
           permissions: [ minter, burner ]
         - account: vote
+        - account: transfer
+          permissions: [ minter, burner ]
       authority: vote
   - name: bank
     config:

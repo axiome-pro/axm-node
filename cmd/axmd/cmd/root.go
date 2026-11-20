@@ -106,6 +106,13 @@ func NewRootCmd() *cobra.Command {
 		},
 	}
 
+	// IBC modules are not in the depinject config: register them for the CLI
+	// (interfaces, genesis defaults, tx/query commands) by hand.
+	for name, mod := range app.RegisterIBC(clientCtx.InterfaceRegistry) {
+		moduleBasicManager[name] = module.CoreAppModuleBasicAdaptor(name, mod)
+		autoCliOpts.Modules[name] = mod
+	}
+
 	initRootCmd(rootCmd, clientCtx.TxConfig, moduleBasicManager)
 
 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
