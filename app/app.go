@@ -38,6 +38,9 @@ import (
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	consensuskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
+	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
+	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 
 	_ "github.com/axiome-pro/axm-node/x/distribution" // import for side-effects
 	_ "github.com/axiome-pro/axm-node/x/slashing"     // import for side-effects
@@ -90,6 +93,13 @@ type AxmApp struct {
 	WasmKeeper            wasm.Keeper
 
 	AuthzKeeper authzkeeper.Keeper
+
+	// IBC keepers (registered by hand, see ibc.go)
+	CapabilityKeeper     *capabilitykeeper.Keeper
+	IBCKeeper            *ibckeeper.Keeper
+	TransferKeeper       ibctransferkeeper.Keeper
+	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
+	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -161,6 +171,12 @@ func NewAxmApp(
 
 	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
 
+	// IBC is not depinject-aware: register its stores, keepers and modules
+	// before the app is loaded.
+	if err := app.registerIBCModules(); err != nil {
+		return nil, err
+	}
+
 	// register streaming services
 	if err := app.RegisterStreamingServices(appOpts, app.kvStoreKeys()); err != nil {
 		return nil, err
@@ -169,6 +185,9 @@ func NewAxmApp(
 	/****  Module Options ****/
 
 	app.RegisterUpgradeHandlers()
+	if err := app.setIBCStoreLoader(); err != nil {
+		return nil, err
+	}
 
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	// NOTE: this is not required apps that don't use the simulator for fuzz testing transactions
